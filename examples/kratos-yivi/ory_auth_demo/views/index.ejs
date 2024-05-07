@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="mx-auto container">
+    <h1 class="text-5xl font-bold text-center my-20">Ory Demo page</h1>
+    <% if(!session){%>
+      <p>You are not logged in</p>
+      <a href="<%=ory_ui_url%>/login" class="text-blue-700 underline">Click here to log in</a>
+    <% } else {%>
+      <p>You are logged in</p>
+      <a href="<%= logout_url%>" class="text-blue-700 underline">Click here to log out</a>
+      <p>Authentication method: <%= session.authentication_methods[0].method%></p>
+      <p>OIDC provider: <%= session.authentication_methods[0].provider%></p>
+      <p>Email address: <%= session.identity.traits.email%></p>
+    <% }%>
+    <p class="text-xl font-bold mt-16">Session information:</p>
+    <pre class="border-2"><%= session ? JSON.stringify(session, null, 2) : ""%></pre>
+  </body>
+</html>

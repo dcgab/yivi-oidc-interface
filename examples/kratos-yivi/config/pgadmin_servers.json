@@ -1,0 +1,13 @@
+{
+    "Servers": {
+        "1": {
+            "Name": "Hydra server",
+            "Group": "Server Group 1",
+            "Port": 54321,
+            "Username": "hydra",
+            "Host": "postgresd",
+            "SSLMode": "prefer",
+            "MaintenanceDB": "postgres"
+        }
+    }
+}
