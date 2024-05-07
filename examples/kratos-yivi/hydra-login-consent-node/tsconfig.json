@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["es2019", "dom"],
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "strict": true,
+    "typeRoots": ["./typings"],
+    "esModuleInterop": true
+  },
+  "exclude": ["contrib"]
+}
