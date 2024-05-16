@@ -1,0 +1,36 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>Yivi web frontend example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="./main.ts" type="module"></script>
+
+    <style>
+      html, body {
+        margin: 10px 0;
+        padding: 0;
+        width: 100%;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      body > * {
+        padding: 10px;
+        margin: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <section class="yivi-web-form" id="yivi-web-form"></section>
+    <p id="redirect-text"></p>
+    <button id="abort-web">Cancel login</button>
+  </body>
+
+</html>
