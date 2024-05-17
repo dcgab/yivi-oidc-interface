@@ -1,0 +1,37 @@
+serve:
+  cookies:
+    same_site_mode: Lax
+
+urls:
+  self:
+    issuer: http://hydra:4444/
+    public: http://127.0.0.1:4444/
+  consent: http://127.0.0.1:3000/consent
+  login: http://127.0.0.1:3000/login
+  logout: http://127.0.0.1:3000/logout
+
+webfinger:
+  oidc_discovery:
+    token_url: http://hydra:4444/oauth2/token
+    supported_claims:
+      - email # email scope
+      - name # profile scope
+    supported_scope:
+      - email
+      - profile
+    # auth_url: http://hydra:4444/oauth2/auth
+
+secrets:
+  system:
+    - youReallyNeedToChangeThis
+
+oidc:
+  subject_identifiers:
+    supported_types:
+      - pairwise
+      - public
+    pairwise:
+      salt: youReallyNeedToChangeThis
+  
+
+dsn: postgres://hydra:secret@postgresd:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4

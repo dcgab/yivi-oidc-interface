@@ -36,8 +36,8 @@ selfservice:
         providers:
           - id: linkedin
             provider: generic
-            client_id: 78y8yopnonfa3n
-            client_secret: MHrQ5iBF110wCoJr
+            client_id: <client_id>
+            client_secret: <client_secret>
             issuer_url: https://www.linkedin.com/oauth
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gewogIGVtYWlsX3ZlcmlmaWVkOiBmYWxzZSwKfSArIHN0ZC5leHRWYXIoJ2NsYWltcycpOwp7CiAgaWRlbnRpdHk6IHsKICAgIHRyYWl0czogewogICAgICAvLyBBbGxvd2luZyB1bnZlcmlmaWVkIGVtYWlsIGFkZHJlc3NlcyBlbmFibGVzIGFjY291bnQKICAgICAgLy8gZW51bWVyYXRpb24gYXR0YWNrcywgIGlmIHRoZSB2YWx1ZSBpcyB1c2VkIGZvcgogICAgICAvLyB2ZXJpZmljYXRpb24gb3IgYXMgYSBwYXNzd29yZCBsb2dpbiBpZGVudGlmaWVyLgogICAgICAvLwogICAgICAvLyBUaGVyZWZvcmUgd2Ugb25seSByZXR1cm4gdGhlIGVtYWlsIGlmIGl0IChhKSBleGlzdHMgYW5kIChiKSBpcyBtYXJrZWQgdmVyaWZpZWQKICAgICAgLy8gYnkgTGlua2VkSW4uCiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyAmJiBjbGFpbXMuZW1haWxfdmVyaWZpZWQgdGhlbiAnZW1haWwnIGVsc2UgbnVsbF06IGNsYWltcy5lbWFpbCwKICAgIH0sCiAgfSwKfQ=="
             scope:
@@ -46,8 +46,8 @@ selfservice:
               - openid
           - id: yivi
             provider: generic
-            client_id: c2bae114-b317-4a1c-b006-835e705fff00
-            client_secret: 5eL-9RjYIky-14k6rrE-0LQuQ~
+            client_id: <client_id>
+            client_secret: <client_secret>
             issuer_url: http://hydra:4444/
             # mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIC8vIEFsbG93aW5nIHVudmVyaWZpZWQgZW1haWwgYWRkcmVzc2VzIGVuYWJsZXMgYWNjb3VudAogICAgICAvLyBlbnVtZXJhdGlvbiBhdHRhY2tzLCAgaWYgdGhlIHZhbHVlIGlzIHVzZWQgZm9yCiAgICAgIC8vIHZlcmlmaWNhdGlvbiBvciBhcyBhIHBhc3N3b3JkIGxvZ2luIGlkZW50aWZpZXIuCiAgICAgIC8vCiAgICAgIC8vIElmIGNvbm5lY3Rpbmcgb25seSB0byB5b3VyIG9yZ2FuaXphdGlvbiAob25lIHRlbmFudCksIGNsYWltcy5lbWFpbCBpcyBzYWZlIHRvIHVzZQogICAgICAvLyBpZiB5b3UgaGF2ZW4ndCBhY3RpdmVseSBkaXNhYmxlZCBlLW1haWwgdmVyaWZpY2F0aW9uIGR1cmluZyBzaWduLXVwLgogICAgICAvLwogICAgICAvLyBUaGUgZW1haWwgbWlnaHQgYmUgZW1wdHkgaWYgdGhlIGFjY291bnQgaXNuJ3QgbGlua2VkIHRvIGFuIGVtYWlsIGFkZHJlc3MuCiAgICAgIC8vIEZvciBhIGh1bWFuIHJlYWRhYmxlIGlkZW50aWZpZXIsIGNvbnNpZGVyIHVzaW5nIHRoZSAicHJlZmVycmVkX3VzZXJuYW1lIiBjbGFpbS4KICAgICAgW2lmICdlbWFpbCcgaW4gY2xhaW1zIHRoZW4gJ2VtYWlsJyBlbHNlIG51bGxdOiBjbGFpbXMuZW1haWwsCiAgICB9LAogIH0sCn0="
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyB0aGVuICdlbWFpbCcgZWxzZSBudWxsXTogY2xhaW1zLmVtYWlsLAogICAgICBuYW1lOiB7CiAgICAgICAgICBbaWYgJ2dpdmVuX25hbWUnIGluIGNsYWltcyB0aGVuICdmaXJzdCcgZWxzZSBudWxsXTogY2xhaW1zLmdpdmVuX25hbWUsCiAgICAgICAgICBbaWYgJ2ZhbWlseV9uYW1lJyBpbiBjbGFpbXMgdGhlbiAnbGFzdCcgZWxzZSBudWxsXTogY2xhaW1zLmZhbWlseV9uYW1lCiAgICAgIH0KICAgIH0sCiAgfSwKfQ=="

@@ -19,10 +19,10 @@ const irmaRequest = {
 const app = express();
 app.use(express.urlencoded());
 
-app.use((_, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
-  next()
-})
+// app.use((_, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+//   next()
+// })
 
 app.use('/assets', express.static(path.join(process.cwd(), './client/dist/assets'), {
 

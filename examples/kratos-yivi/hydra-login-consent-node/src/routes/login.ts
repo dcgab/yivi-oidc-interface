@@ -27,7 +27,6 @@ router.get("/", csrfProtection, (req, res, next) => {
     next(new Error("Expected a login challenge to be set but received none."))
     return
   }
-
   hydraAdmin
     .getOAuth2LoginRequest({
       loginChallenge: challenge
