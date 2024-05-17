@@ -1,6 +1,12 @@
 # include:
 #   - ../vendor/irmago/docker-compose.yml
 services:
+  yivi_consent_node:
+    build: .
+    ports: 
+      - 3000:3000
+    networks:
+      - yivi-oidc-network
   irma_server:
     image: ghcr.io/privacybydesign/irma:latest
     command: server --verbose --jwt-privkey-file /irmago/config/private.pem --url "http://145.116.164.223:port"
@@ -8,7 +14,7 @@ services:
       - 8088:8088
     volumes:
       - type: bind
-        source: ./config
+        source: ./config/yivi
         target: /irmago/config
     networks:
       - yivi-oidc-network

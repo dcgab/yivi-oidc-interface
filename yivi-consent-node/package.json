@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "ts-node-dev src/main.ts",
-    "start": "NODE_ENV=production tsx src/main.ts",
+    "dev": "ts-node-dev src/app.ts",
+    "start": "NODE_ENV=production tsx src/app.ts",
     "build": "vite build",
     "dev-client": "vite",
     "preview-client": "vite preview"
