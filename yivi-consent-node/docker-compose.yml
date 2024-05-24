@@ -1,0 +1,88 @@
+# include:
+#   - ../vendor/irmago/docker-compose.yml
+services:
+  # yivi_consent_node:
+  #   build: .
+  #   ports: 
+  #     - 3000:3000
+  #   networks:
+  #     - yivi-oidc-network
+  irma_server:
+    image: ghcr.io/privacybydesign/irma:latest
+    command: server --verbose --jwt-privkey-file /irmago/config/private.pem --url "http://145.116.164.223:port"
+    ports:
+      - 8088:8088
+    volumes:
+      - type: bind
+        source: ./config/yivi
+        target: /irmago/config
+    networks:
+      - yivi-oidc-network
+  hydra:
+    image: oryd/hydra:v2.2.0
+    ports:
+      - "4444:4444" # Public port
+      - "4445:4445" # Admin port
+      - "5555:5555" # Port for hydra token user
+    # command: serve -c /etc/config/hydra/hydra.yml all --dev
+    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    volumes:
+      - type: bind
+        source: ./config/hydra
+        target: /etc/config/hydra
+    # volumes:
+      # - type: volume
+      #   source: hydra-sqlite
+      #   target: /var/lib/sqlite
+      #   read_only: false
+      # - type: bind
+      #   source: ./contrib/quickstart/5-min
+      #   target: /etc/config/hydra
+    environment:
+      - SECRETS_SYSTEM=${SECRETS_SYSTEM}
+      - DSN=${HYDRA_DSN}
+      # - URLS_SELF_ISSUER=https://localhost:4444/
+      # - URLS_CONSENT=http://localhost:3000/consent
+      # - URLS_LOGIN=http://localhost:3000/login
+    restart: unless-stopped
+    depends_on:
+      hydra-migrate:
+        condition: service_completed_successfully
+        restart: false
+      postgresd_hydra:
+        condition: service_started
+        restart: false
+    networks:
+      - yivi-oidc-network
+  hydra-migrate:
+    image: oryd/hydra:v2.2.0
+    environment:
+      - DSN=${HYDRA_DSN}
+    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    restart: on-failure
+    networks:
+      - yivi-oidc-network
+    volumes:
+      - type: bind
+        source: ./config/hydra
+        target: /etc/config/hydra
+    depends_on:
+      postgresd_hydra:
+        condition: service_started
+        restart: false
+  postgresd_hydra:
+      image: postgres:16.3
+      ports:
+        - "5432:5432"
+      environment:
+        - POSTGRES_USER=${DB_USER}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
+        - POSTGRES_DB=hydra
+      volumes:
+        - postgres-hydra-data:/var/lib/postgresql/data
+      networks:
+        - yivi-oidc-network
+volumes:
+  postgres-hydra-data:
+networks:
+  yivi-oidc-network:
