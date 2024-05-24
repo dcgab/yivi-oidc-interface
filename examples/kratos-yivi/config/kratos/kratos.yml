@@ -46,14 +46,14 @@ selfservice:
               - openid
           - id: yivi
             provider: generic
-            client_id: c2bae114-b317-4a1c-b006-835e705fff00
-            client_secret: 5eL-9RjYIky-14k6rrE-0LQuQ~
-            issuer_url: http://hydra:4444/
+            client_id: c5f471dc-c7dd-4a0d-8ab3-c665104d4a97
+            client_secret: wpHIh0Qi.eNU5Q4TST9bI1eDz7
+            issuer_url: http://host.docker.internal:4444/
             # mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIC8vIEFsbG93aW5nIHVudmVyaWZpZWQgZW1haWwgYWRkcmVzc2VzIGVuYWJsZXMgYWNjb3VudAogICAgICAvLyBlbnVtZXJhdGlvbiBhdHRhY2tzLCAgaWYgdGhlIHZhbHVlIGlzIHVzZWQgZm9yCiAgICAgIC8vIHZlcmlmaWNhdGlvbiBvciBhcyBhIHBhc3N3b3JkIGxvZ2luIGlkZW50aWZpZXIuCiAgICAgIC8vCiAgICAgIC8vIElmIGNvbm5lY3Rpbmcgb25seSB0byB5b3VyIG9yZ2FuaXphdGlvbiAob25lIHRlbmFudCksIGNsYWltcy5lbWFpbCBpcyBzYWZlIHRvIHVzZQogICAgICAvLyBpZiB5b3UgaGF2ZW4ndCBhY3RpdmVseSBkaXNhYmxlZCBlLW1haWwgdmVyaWZpY2F0aW9uIGR1cmluZyBzaWduLXVwLgogICAgICAvLwogICAgICAvLyBUaGUgZW1haWwgbWlnaHQgYmUgZW1wdHkgaWYgdGhlIGFjY291bnQgaXNuJ3QgbGlua2VkIHRvIGFuIGVtYWlsIGFkZHJlc3MuCiAgICAgIC8vIEZvciBhIGh1bWFuIHJlYWRhYmxlIGlkZW50aWZpZXIsIGNvbnNpZGVyIHVzaW5nIHRoZSAicHJlZmVycmVkX3VzZXJuYW1lIiBjbGFpbS4KICAgICAgW2lmICdlbWFpbCcgaW4gY2xhaW1zIHRoZW4gJ2VtYWlsJyBlbHNlIG51bGxdOiBjbGFpbXMuZW1haWwsCiAgICB9LAogIH0sCn0="
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyB0aGVuICdlbWFpbCcgZWxzZSBudWxsXTogY2xhaW1zLmVtYWlsLAogICAgICBuYW1lOiB7CiAgICAgICAgICBbaWYgJ2dpdmVuX25hbWUnIGluIGNsYWltcyB0aGVuICdmaXJzdCcgZWxzZSBudWxsXTogY2xhaW1zLmdpdmVuX25hbWUsCiAgICAgICAgICBbaWYgJ2ZhbWlseV9uYW1lJyBpbiBjbGFpbXMgdGhlbiAnbGFzdCcgZWxzZSBudWxsXTogY2xhaW1zLmZhbWlseV9uYW1lCiAgICAgIH0KICAgIH0sCiAgfSwKfQ=="
             scope:
               - email
-              - profile
+              - phone
               - openid
       enabled: true
 

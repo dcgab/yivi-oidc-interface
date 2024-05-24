@@ -15,7 +15,7 @@ router.post('/', (_, res) => {
   // const result = jwt.verify(jwtToken, publicKey);  
 
   // res.json(jwtToken);
-  res.redirect('/');
+  res.redirect('/login');
 })
 
 export default router

@@ -4,15 +4,16 @@ serve:
 
 urls:
   self:
-    issuer: http://hydra:4444/
-    public: http://127.0.0.1:4444/
+    issuer: http://host.docker.internal:4444/ # Used for server-to-server communication (can be docker hostname)
+    public: http://127.0.0.1:4444/ # Used for browser-toserver communication (must be public reachable url)
   consent: http://127.0.0.1:3000/consent
   login: http://127.0.0.1:3000/login
   logout: http://127.0.0.1:3000/logout
 
 webfinger:
   oidc_discovery:
-    token_url: http://hydra:4444/oauth2/token
+    # token_url: http://hydra:4444/oauth2/token
+    token_url: http://host.docker.internal:4444/oauth2/token
     supported_claims:
       - email # email scope
       - name # profile scope
