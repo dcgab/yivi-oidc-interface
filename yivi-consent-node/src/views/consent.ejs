@@ -3,31 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css">
     <title>Consent request</title>
 </head>
-<body>
-    <h1>An application requests access to your data!</h1>
-    <form action="/consent" method="post">
-        <input type="hidden" name="challenge" value="<%= challenge %>">
-        <% if (client.logo_uri) { %>
-         <img width="400px" src="<%= client.logo_uri %>" alt="client logo">
-        <% } %>
-        <p>Hi <%= user %>, <strong><%= client.client_name || client.client_id %></strong> wants to access resources on your behalf and to:</p>
-            <ul>
+<body class="bg-gray-100">
+    <div class="container mx-auto">
+        <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg px-8 py-16 text-center mt-16">
+            <h1 class="text-2xl font-bold">An application requests access to your data</h1>
+            <form class="" action="/consent" method="post">
+                <input type="hidden" name="challenge" value="<%= challenge %>">
+                <% if (client.logo_uri) { %>
+                 <img class="mx-auto mt-8 mb-16" width="400px" src="<%= client.logo_uri %>" alt="client logo">
+                <% } %>
+                <div class="w-10/12 mx-auto">
+                    <div class="border border-gray-300 px-6 py-12 mb-24">
+                        <p class="mb-8">Hi <%= user %>, <strong><%= client.client_name || client.client_id %></strong> wants to access resources on your behalf and to:</p>
 
+                        <ul class="list-disc text-left ml-8">
+                        <% Object.entries(requestedData).forEach(scope => { %>
+                            <li><span class="font-bold"><%= scope[0] %></span>: <%= scope[1] %></li>
+                        <% }) %>
+                            </ul>
+                    </div>
+                    
             
-        <% requested_scope.forEach(scope => { %>
-            <li><%= scope %></li>
-        <% }) %>
-            </ul>
-
-        <p><input type="checkbox" name="remember" id="remember" value="1"><label for="remember">Do not ask me again</label></p>
+                    <label class="mb-4 text-left block"><input class="text-left mr-2" type="checkbox" name="remember" id="remember" checked="true"> Do not ask me again</label>
+                    
+                    <div class="flex justify-left gap-6">
+                        <input class="px-6 py-2 border bg-gray-100 hover:bg-gray-200 border-gray-400 rounded-md cursor-pointer" type="submit" name="submit" id="reject" value="Deny">
+                        <input class="px-6 py-2 border bg-blue-300 hover:bg-blue-400 border-gray-400 rounded-md cursor-pointer" type="submit" name="submit" id="accept" value="Allow">
+                    </div>
+                </div>
+                
+        
+            </form>
+        </div>
+        
+    </div>
     
-        <p>
-            <input type="submit" name="submit" id="accept" value="Allow access">
-            <input type="submit" name="submit" id="reject" value="Deny access">
-        </p>
-
-    </form>
 </body>
 </html>

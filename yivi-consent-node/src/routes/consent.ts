@@ -6,17 +6,66 @@ import express from "express"
 import { hydraAdmin } from "../config"
 import { AcceptOAuth2ConsentRequestSession } from "@ory/client";
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import { AttributeKeys, attributeMap } from '../attributes';
 
 const router = express.Router();
 
-const createSession = (_yivi_jwt: string, _session: AcceptOAuth2ConsentRequestSession) => {
+interface DisclosureAttribute {
+    rawvalue: string;
+    value: {
+        "": string;
+        "en": string;
+        "nl": string;
+    },
+    id: string;
+    status: string;
+    issuancetime: number;
+};
+
+interface Disclosure extends Array<Array<DisclosureAttribute>>{};
+const attributeLookup = {
+    "pbdf.sidn-pbdf.mobilenumber.mobilenumber": "phone_number",
+    "pbdf.sidn-pbdf.email.email": "email"
+}
+type AttributesType = keyof typeof attributeLookup;
+
+const createSession = (_yivi_jwt: JwtPayload, _session: AcceptOAuth2ConsentRequestSession): AcceptOAuth2ConsentRequestSession => {
     // Yivi JWT token is already verified in login step.
     // The token is bound to the Hydra session, so it is trusted
-    const jwtDecoded  = jwt.decode(_yivi_jwt);
-    return jwtDecoded;
+    const disclosed = _yivi_jwt['disclosed'] as Disclosure;
+    const idToken: { [key: string]: any } = {};
+    for(const credential of disclosed) {
+        for(const attribute of credential) {
+            idToken[attributeLookup[attribute.id as AttributesType]] = attribute.rawvalue;
+        }
+    }
+    
+    console.log({
+        access_token: _session.access_token,
+        id_token: {
+            ...idToken,
+            ..._session.id_token
+        }
+    });
+    
+    // return jwtDecoded as jwt.JwtPayload;
+    return {
+        access_token: _session.access_token,
+        id_token: {
+            ...idToken,
+            ..._session.id_token
+        }
+    } as AcceptOAuth2ConsentRequestSession;
     
 }
-createSession('', {});
+
+const session: AcceptOAuth2ConsentRequestSession = {
+    access_token: {
+
+    },
+    id_token: {
+    }
+}
 
 router.get('/', (req, res, next) => {
     let consentChallenge = req.query.consent_challenge;
@@ -31,27 +80,40 @@ router.get('/', (req, res, next) => {
         consentChallenge: consentChallenge
     })
     .then(({data: body}) => {
-        res.render("consent.ejs", {
+        const context = body.context! as {yivi_jwt: string};
+        const decodedJwt =  jwt.decode(context.yivi_jwt) as JwtPayload;
+        let requestedScopeFriendlyNames: Record<string, string> = {};
+        for(const disclosedAttr of decodedJwt['disclosed'].flat()) {
+            requestedScopeFriendlyNames[attributeMap[disclosedAttr['id'] as AttributeKeys].name.en] = disclosedAttr['rawvalue'];
+        }
+
+        if(body.skip || body.client?.skip_consent) {
+            return hydraAdmin.acceptOAuth2ConsentRequest({
+                consentChallenge: consentChallenge,
+                acceptOAuth2ConsentRequest: {
+                    grant_scope: body.requested_scope,
+                    grant_access_token_audience: body.requested_access_token_audience,
+                    session: createSession(decodedJwt, session),
+                    remember: !!req.body.remember,
+                    remember_for: 0
+                }
+            }).then(({data: body}) => {
+                return res.redirect(String(body.redirect_to))
+            });
+        }
+        console.log(body);
+        
+        
+        
+        return res.render("consent.ejs", {
             challenge: consentChallenge,
-            requested_scope: body.requested_scope,
+            requestedData: requestedScopeFriendlyNames,
             user: body.subject,
             client: body.client
         });
     })
     .catch(err => next(new Error(err.response.data.error_description)))
 });
-
-const session: AcceptOAuth2ConsentRequestSession = {
-    access_token: {
-
-    },
-    id_token: {
-        email: "foo@bar.com",
-        email_verified: true,
-        phone_number: "+31612369888",
-        phone_number_verified: true
-    }
-}
 
 // @ts-ignore
 router.post("/", (req, res, next) => {
@@ -83,7 +145,9 @@ router.post("/", (req, res, next) => {
             acceptOAuth2ConsentRequest: {
                 grant_scope: body.requested_scope,
                 grant_access_token_audience: body.requested_access_token_audience,
-                session: session
+                session: createSession(decodedJwt, session),
+                remember: !!req.body.remember,
+                remember_for: 0
             }
         }).then(({data: body}) => {
             res.redirect(String(body.redirect_to))

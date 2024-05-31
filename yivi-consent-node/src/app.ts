@@ -26,6 +26,8 @@ app.use('/assets', express.static(path.join(process.cwd(), './client/dist/assets
 
 }))
 
+app.use('/', express.static(path.join(process.cwd(), './public')));
+
 // app.get('/', (_, res) => {
 //   res.sendFile(path.join(process.cwd(), 'client/dist/index.html'))
 // });
