@@ -7,6 +7,11 @@
   </head>
   <body class="mx-auto container">
     <h1 class="text-5xl font-bold text-center my-20">Ory Demo page</h1>
+    <% if(from === 'registration'){%>
+      <h3 class="text-md font-bold bg-gray-100 border border-gray-200 p-4 rounded-lg mb-8">Registration complete. You can now log in.</h3>
+    <% } else if(from === 'login') { %>
+      <h3 class="text-md font-bold bg-gray-100 border border-gray-200 p-4 rounded-lg mb-8">You are now logged in.</h3>
+    <% } %>
     <% if(!session){%>
       <p>You are not logged in</p>
       <a href="<%=ory_ui_url%>/login" class="text-blue-700 underline">Click here to log in</a>

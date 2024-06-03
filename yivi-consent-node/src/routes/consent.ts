@@ -25,7 +25,9 @@ interface DisclosureAttribute {
 interface Disclosure extends Array<Array<DisclosureAttribute>>{};
 const attributeLookup = {
     "pbdf.sidn-pbdf.mobilenumber.mobilenumber": "phone_number",
-    "pbdf.sidn-pbdf.email.email": "email"
+    "pbdf.sidn-pbdf.email.email": "email",
+    "pbdf.gemeente.personalData.firstnames": "pbdf.gemeente.personalData.firstnames",
+    "pbdf.gemeente.personalData.familyname": "pbdf.gemeente.personalData.familyname"
 }
 type AttributesType = keyof typeof attributeLookup;
 
@@ -118,7 +120,7 @@ router.get('/', (req, res, next) => {
 // @ts-ignore
 router.post("/", (req, res, next) => {
     const challenge = req.body.challenge;
-    if(req.body.submit === 'Deny access') {
+    if(req.body.submit === 'Deny') {
         return (hydraAdmin.rejectOAuth2ConsentRequest({
             consentChallenge: challenge,
             rejectOAuth2Request: {

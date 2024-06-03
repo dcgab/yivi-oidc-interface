@@ -1,0 +1,16 @@
+<Issuer version="4">
+	<ID>surf</ID>
+	<DeprecatedSince>1670511600</DeprecatedSince>
+	<ShortName>
+		<en>SURF</en>
+		<nl>SURF</nl>
+	</ShortName>
+	<Name>
+		<en>SURF</en>
+		<nl>SURF</nl>
+	</Name>
+	<SchemeManager>pbdf</SchemeManager>
+	<ContactAddress>https://surfnet.nl</ContactAddress>
+	<ContactEMail>info@surfconext.nl</ContactEMail>
+	<baseURL></baseURL>
+</Issuer>

@@ -34,7 +34,7 @@ router.get('/', async function(req: Request, res: Response, next: NextFunction) 
     session = null
   }
 
-  res.render('index', { title: 'Express', session: session ? session : '', logout_url: logout_url, ory_ui_url: process.env.ORY_UI_URL});
+  res.render('index', { title: 'Express', session: session ? session : '', logout_url: logout_url, ory_ui_url: process.env.ORY_UI_URL, from: req.query.from});
   
 
   // await ory.createBrowserLogoutFlow({cookie: req.header("cookie"), returnTo: `${process.env.APP_URL}`})
