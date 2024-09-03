@@ -1,3 +1,6 @@
+vendor/schemes/irma-demo
+vendor/schemes/pbdf
+
 kratos.yml
 
 # Logs

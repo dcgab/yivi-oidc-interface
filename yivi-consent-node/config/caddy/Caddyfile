@@ -1,0 +1,11 @@
+oidc.dennisgabeler.nl {
+	reverse_proxy http://hydra:4444
+}
+
+yivi-server.dennisgabeler.nl {
+	reverse_proxy http://yivi_server:8088
+}
+
+yivi.dennisgabeler.nl {
+	reverse_proxy http://yivi_consent_node:3000
+}

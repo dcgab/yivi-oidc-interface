@@ -17,7 +17,7 @@
                 <% } %>
                 <div class="w-10/12 mx-auto">
                     <div class="border border-gray-300 px-6 py-12 mb-24">
-                        <p class="mb-8">Hi <%= user %>, <strong><%= client.client_name || client.client_id %></strong> wants to access resources on your behalf and to:</p>
+                        <p class="mb-8">Hi <%= user %>, <strong><%= client.client_name || client.client_id %></strong> would like access to the following resources:</p>
 
                         <ul class="list-disc text-left ml-8">
                         <% Object.entries(requestedData).forEach(scope => { %>

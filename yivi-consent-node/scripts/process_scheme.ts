@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path';
 import { XMLParser } from 'fast-xml-parser';
+import { execSync } from 'child_process';
 
 const getDirectories = (directory: string) => {
     return fs.readdirSync((directory), {
@@ -9,8 +10,13 @@ const getDirectories = (directory: string) => {
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name)
 }
+
 const SCHEME = "pbdf";
-const issuers = getDirectories(path.join(process.cwd(), `../vendor/schemes/${SCHEME}`));
+const SCHEMES_PATH = path.join(process.cwd(), `../vendor/schemes/`);
+
+execSync(`rm -rf ${SCHEMES_PATH}/{pbdf,irma-demo} && irma scheme download ${SCHEMES_PATH}`)
+
+const issuers = getDirectories(path.join(SCHEMES_PATH, `/${SCHEME}`));
 const parser = new XMLParser({
     ignoreAttributes: false
 });
@@ -26,6 +32,8 @@ export interface Attribute {
         nl: string;
     }
 };
+
+
 
 let attributesMap: Record<string, Attribute> = {};
 

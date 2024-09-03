@@ -21,6 +21,8 @@
       <p>Authentication method: <%= session.authentication_methods[0].method%></p>
       <p>OIDC provider: <%= session.authentication_methods[0].provider%></p>
       <p>Email address: <%= session.identity.traits.email%></p>
+      <p>Phone number: <%= session.identity.traits.phone_number%></p>
+      <p>Name: <%= `${session.identity.traits.name.first} ${session.identity.traits.name.last}` %></p>
     <% }%>
     <p class="text-xl font-bold mt-16">Session information:</p>
     <pre class="border-2"><%= session ? JSON.stringify(session, null, 2) : ""%></pre>
