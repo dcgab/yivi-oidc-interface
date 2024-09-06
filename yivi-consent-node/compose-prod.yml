@@ -45,7 +45,7 @@ services:
       # - "4445:4445" # Admin port
       # - "5555:5555" # Port for hydra token user
     # command: serve -c /etc/config/hydra/hydra.yml all --dev
-    command: serve -c /etc/config/hydra/hydra.yml all --dev
+    command: serve -c /etc/config/hydra/hydra-prod.yml all --dev
     volumes:
       - type: bind
         source: ./config/hydra
