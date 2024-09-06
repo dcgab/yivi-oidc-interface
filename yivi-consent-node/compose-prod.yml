@@ -28,8 +28,9 @@ services:
     networks:
       - yivi-oidc-network
   irma_server:
-    image: ghcr.io/privacybydesign/irma:latest
-    command: server --verbose --jwt-privkey-file /irmago/config/private.pem --url "https://yivi-server.dennisgabeler.nl:port" -p 443
+    build: ../vendor/irmago/
+#    image: ghcr.io/privacybydesign/irma:edge
+    command: server -vv --jwt-privkey-file /irmago/config/private.pem --url "https://yivi-server.dennisgabeler.nl" -p 8088
     # ports:
     #   - 8088:8088
     volumes:

@@ -19,7 +19,7 @@ let options = {
   // Back-end options
   session: {
     // Point this to your IRMA server:
-    url: 'https://yivi.dennisgabeler.nl:443',
+    url: 'https://yivi.dennisgabeler.nl',
     start: {
       url: (o) => `${o.url}/start/${(new URLSearchParams(location.search)).get('login_challenge')}`,
       method: 'GET',

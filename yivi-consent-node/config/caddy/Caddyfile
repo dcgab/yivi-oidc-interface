@@ -3,7 +3,7 @@ oidc.dennisgabeler.nl {
 }
 
 yivi-server.dennisgabeler.nl {
-	reverse_proxy http://yivi_server:8088
+	reverse_proxy http://irma_server:8088
 }
 
 yivi.dennisgabeler.nl {

@@ -4,7 +4,7 @@ serve:
 
 urls:
   self:
-    issuer: http://hydra:4444/ # Used for server-to-server communication (can be docker hostname)
+    issuer: https://oidc.dennisgabeler.nl/ # Used for server-to-server communication (can be docker hostname)
     public: https://oidc.dennisgabeler.nl/ # Used for browser-toserver communication (must be public reachable url)
   consent: https://yivi.dennisgabeler.nl/consent
   login: https://yivi.dennisgabeler.nl/login
