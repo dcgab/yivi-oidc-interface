@@ -16,7 +16,7 @@ services:
       - "80:80"
       - "80:80/udp"
     volumes:
-      - $PWD/config/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./config/caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
     networks:
@@ -79,7 +79,7 @@ services:
     image: oryd/hydra:v2.2.0
     environment:
       - DSN=${HYDRA_DSN}
-    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    command: migrate -c /etc/config/hydra/hydra-prod.yml sql -e --yes
     restart: on-failure
     networks:
       - yivi-oidc-network

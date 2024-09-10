@@ -19,8 +19,11 @@ services:
       - intranet
   kratos-migrate:
     image: oryd/kratos:v1.1.0
-    environment:
-      - DSN=${KRATOS_DSN}
+    #environment:
+    #  - DSN=${KRATOS_DSN}
+    env_file:
+      - path: ../examples/kratos-yivi/.env
+        required: true
     volumes:
       - type: bind
         source: ../examples/kratos-yivi/config/kratos
@@ -34,6 +37,9 @@ services:
     networks:
       - intranet
   kratos-selfservice-ui-node:
+    build:
+      context: ../vendor/kratos-selfservice-ui-node
+      dockerfile: ./Dockerfile
     image: oryd/kratos-selfservice-ui-node:v1.1.0
     environment:
       - KRATOS_PUBLIC_URL=http://kratos:4433/
@@ -63,8 +69,9 @@ services:
       # - '4433:4433' # public
       # - '4434:4434' # admin
     restart: unless-stopped
+    env_file: ../examples/kratos-yivi/.env
     environment:
-      - DSN=${KRATOS_DSN}
+#      - DSN=${KRATOS_DSN}
       - LOG_LEVEL=trace
     command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
     volumes:
