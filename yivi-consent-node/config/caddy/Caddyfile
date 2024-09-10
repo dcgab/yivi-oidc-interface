@@ -9,3 +9,17 @@ yivi-server.dennisgabeler.nl {
 yivi.dennisgabeler.nl {
 	reverse_proxy http://yivi_consent_node:3000
 }
+
+demo-app.dennisgabeler.nl {
+	handle_path /ui* {
+		reverse_proxy http://kratos-selfservice-ui-node:4455
+	}
+
+	handle_path /self-service* {
+		reverse_proxy http://kratos-selfservice-ui-node:4433
+	}
+
+	handle_path * {
+		reverse_proxy http://ory_auth_demo:4000
+	}
+}
