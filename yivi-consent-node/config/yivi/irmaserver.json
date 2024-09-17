@@ -1,0 +1,8 @@
+{
+    "requestors": {
+        "oryhydra": {
+            "auth_method": "token",
+            "key": "lQ3LigDJydlMdm9oFwVolJlxRqCEaXtd"
+        }
+    }
+}

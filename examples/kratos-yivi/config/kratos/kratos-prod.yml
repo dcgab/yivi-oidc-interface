@@ -98,6 +98,10 @@ selfservice:
           hooks:
             - hook: session
             - hook: show_verification_ui
+        oidc:
+          hooks:
+            - hook: session
+          default_browser_return_url: https://demo-app.dennisgabeler.nl?from=login
         default_browser_return_url: https://demo-app.dennisgabeler.nl?from=registration
 
 log:

@@ -73,7 +73,7 @@ services:
     environment:
 #      - DSN=${KRATOS_DSN}
       - LOG_LEVEL=trace
-    command: serve -c /etc/config/kratos/kratos-prod.yml --dev --watch-courier
+    command: serve -c /etc/config/kratos/kratos-prod.yml
     volumes:
       - type: bind
         source: ../examples/kratos-yivi/config/kratos
