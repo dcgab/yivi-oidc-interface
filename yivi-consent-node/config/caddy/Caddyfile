@@ -1,3 +1,7 @@
+{
+  #local_certs
+}
+
 oidc.dennisgabeler.nl {
 	reverse_proxy http://hydra:4444
 }
@@ -11,13 +15,21 @@ yivi.dennisgabeler.nl {
 }
 
 demo-app.dennisgabeler.nl {
+        @kratos_paths {
+          path /self-service*
+          path /sessions*
+          path /.well-known*
+        }
+
 	handle_path /ui* {
 		reverse_proxy http://kratos-selfservice-ui-node:4455
 	}
 
-	handle_path /self-service* {
-		reverse_proxy http://kratos-selfservice-ui-node:4433
+	handle @kratos_paths {
+		reverse_proxy http://kratos:4433
 	}
-
-	reverse_proxy http://ory_auth_demo:4000
+        
+        handle {
+                reverse_proxy http://ory_auth_demo:3000
+        }
 }
