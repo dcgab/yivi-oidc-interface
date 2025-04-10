@@ -3,7 +3,7 @@ import IrmaBackend from '@privacybydesign/irma-backend';
 import { Configuration, OAuth2Api } from "@ory/client"
 
 // const irmaBackend = new IrmaBackend("http://irma_server:8088", {serverToken: false, debugging: true})
-const irmaBackend = new IrmaBackend(process.env.IRMA_SERVER_URL, {serverToken: false, debugging: true})
+const irmaBackend = new IrmaBackend(process.env.IRMA_SERVER_URL, {serverToken: process.env.IRMA_SERVER_TOKEN, debugging: true})
 
 const configuration = new Configuration({
     basePath: process.env.HYDRA_ADMIN_URL,
