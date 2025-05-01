@@ -1,11 +1,15 @@
 serve:
+  # public:
+  #   cors: 
+  #     enabled: true
   cookies:
     same_site_mode: Lax
 
 urls:
   self:
-    issuer: http://host.docker.internal:4444/ # Used for server-to-server communication (can be docker hostname)
+    issuer: http://hydra:4444 # Used for server-to-server communication (can be docker hostname)
     public: http://127.0.0.1:4444/ # Used for browser-toserver communication (must be public reachable url)
+    admin: http://hydra:4445/ # Used for admin communication (can be docker hostname)
   consent: http://127.0.0.1:3000/consent
   login: http://127.0.0.1:3000/login
   logout: http://127.0.0.1:3000/logout
@@ -21,6 +25,9 @@ webfinger:
       - email
       - profile
     # auth_url: http://hydra:4444/oauth2/auth
+
+oauth2:
+  expose_internal_errors: true
 
 secrets:
   system:

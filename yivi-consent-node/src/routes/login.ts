@@ -37,6 +37,7 @@ router.get('/', (req, res, next) => {
             res.sendFile(path.join(process.cwd(), 'client/dist/index.html'))
         })
         .catch(_ => {
+            console.log(_);
             next(new Error("Login challenge expired"));
             return;
         })

@@ -43,10 +43,12 @@ router.get('/:login_challenge', (req, res) => {
     .then(({ data: body }) => {
       irmaBackend.startSession(createIrmaRequestFromScope(body.requested_scope!))
         .then((result: any) => {
+          console.log("irmaBackend.startSession result", result);
           res.json(result);
         })
         .catch((_: any) => {
-          return res.status(500).send('Could not start discluse request session');
+          console.log("irmaBackend.startSession error", _);
+          return res.status(500).send('Could not start disclosure request session');
         })
     })
     .catch(_ => {

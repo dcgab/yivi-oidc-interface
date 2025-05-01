@@ -1,11 +1,4 @@
-version: "3.7"
 services:
-  # yivi-consent-node:
-  #   build: hydra-login-consent-node
-  #   ports:
-  #     - "3000:3000" # Public port
-  #   networks:
-  #     - intranet
   proxy:
     networks:
       - intranet
@@ -18,7 +11,7 @@ services:
     networks:
       - intranet
   kratos-migrate:
-    image: oryd/kratos:v1.1.0
+    image: oryd/kratos:v1.3.0
     #environment:
     #  - DSN=${KRATOS_DSN}
     env_file:
@@ -64,7 +57,7 @@ services:
       postgresd_kratos:
         condition: service_started
         restart: false
-    image: oryd/kratos:v1.1.0
+    image: oryd/kratos:v1.3.0
 #    ports:
       # - '4433:4433' # public
       # - '4434:4434' # admin
@@ -90,7 +83,7 @@ services:
     networks:
       - intranet
   postgresd_kratos:
-    image: postgres:16.2
+    image: postgres:17.4
    # ports:
    #   - "5433:5432"
     environment:
