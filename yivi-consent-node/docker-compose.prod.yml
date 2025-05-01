@@ -9,7 +9,7 @@
 
 services:
   proxy:
-    image: caddy:2.8.4-alpine
+    image: caddy:2.10.0-alpine
     ports:
       - "443:443"
       - "443:443/udp"
@@ -40,7 +40,7 @@ services:
     networks:
       - yivi-oidc-network
   hydra:
-    image: oryd/hydra:v2.2.0
+    image: oryd/hydra:v2.3.0
     # ports:
       # - "4444:4444" # Public port
       # - "4445:4445" # Admin port
@@ -60,7 +60,7 @@ services:
       #   source: ./contrib/quickstart/5-min
       #   target: /etc/config/hydra
     environment:
-      - SECRETS_SYSTEM=${SECRETS_SYSTEM}
+      - SECRETS_SYSTEM=${SECRETS_SYSTEM} 
       - DSN=${HYDRA_DSN}
       # - URLS_SELF_ISSUER=https://localhost:4444/
       # - URLS_CONSENT=http://localhost:3000/consent
@@ -76,7 +76,7 @@ services:
     networks:
       - yivi-oidc-network
   hydra-migrate:
-    image: oryd/hydra:v2.2.0
+    image: oryd/hydra:v2.3.0
     environment:
       - DSN=${HYDRA_DSN}
     command: migrate -c /etc/config/hydra/hydra-prod.yml sql -e --yes
@@ -92,7 +92,7 @@ services:
         condition: service_started
         restart: false
   postgresd_hydra:
-      image: postgres:16.3
+      image: postgres:17.4
       # ports:
         # - "5432:5432"
       environment:

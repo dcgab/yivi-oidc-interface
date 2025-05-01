@@ -4,7 +4,7 @@ services:
       - intranet
   ory_auth_demo:
     build:
-      context: ../examples/kratos-yivi/ory_auth_demo
+      context: ./examples/kratos-yivi/ory_auth_demo
       dockerfile: ./Dockerfile
 #    ports:
       # - "4000:4000" # Public port
@@ -15,11 +15,11 @@ services:
     #environment:
     #  - DSN=${KRATOS_DSN}
     env_file:
-      - path: ../examples/kratos-yivi/.env
+      - path: ./examples/kratos-yivi/.env
         required: true
     volumes:
       - type: bind
-        source: ../examples/kratos-yivi/config/kratos
+        source: ./examples/kratos-yivi/config/kratos
         target: /etc/config/kratos
     command: -c /etc/config/kratos/kratos-prod.yml migrate sql -e --yes
     restart: on-failure
@@ -31,7 +31,7 @@ services:
       - intranet
   kratos-selfservice-ui-node:
     build:
-      context: ../vendor/kratos-selfservice-ui-node
+      context: ./vendor/kratos-selfservice-ui-node
       dockerfile: ./Dockerfile
     image: oryd/kratos-selfservice-ui-node:v1.1.0
     environment:
@@ -62,14 +62,14 @@ services:
       # - '4433:4433' # public
       # - '4434:4434' # admin
     restart: unless-stopped
-    env_file: ../examples/kratos-yivi/.env
+    env_file: ./examples/kratos-yivi/.env
     environment:
 #      - DSN=${KRATOS_DSN}
       - LOG_LEVEL=trace
     command: serve -c /etc/config/kratos/kratos-prod.yml
     volumes:
       - type: bind
-        source: ../examples/kratos-yivi/config/kratos
+        source: ./examples/kratos-yivi/config/kratos
         target: /etc/config/kratos
     networks:
       - intranet
