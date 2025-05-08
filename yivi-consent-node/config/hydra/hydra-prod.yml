@@ -2,18 +2,8 @@ serve:
   cookies:
     same_site_mode: Lax
 
-urls:
-  self:
-    issuer: https://oidc.dennisgabeler.nl/ # Used for server-to-server communication (can be docker hostname)
-    public: https://oidc.dennisgabeler.nl/ # Used for browser-toserver communication (must be public reachable url)
-  consent: https://yivi.dennisgabeler.nl/consent
-  login: https://yivi.dennisgabeler.nl/login
-  logout: https://yivi.dennisgabeler.nl/logout
-
 webfinger:
   oidc_discovery:
-    # token_url: http://hydra:4444/oauth2/token
-    token_url: https://oidc.dennisgabeler.nl/oauth2/token
     supported_claims:
       - email # email scope
       - name # profile scope
@@ -21,20 +11,8 @@ webfinger:
       - email
       - profile
     # auth_url: http://hydra:4444/oauth2/auth
-
-secrets:
-  cookie:
-    - "Ambc9gR6wQAsA7Mz5FwfmyDnShzqTbT2" # tr -dc A-Za-z0-9 </dev/urandom | head -c 32; echo
-  system:
-    - "YCMvl8tjsW4jKSXnF0PQoTsy67rYP0YC"
-
 oidc:
   subject_identifiers:
     supported_types:
       - pairwise
       - public
-    pairwise:
-      salt: "dZp7RX4TsnU0g9YoyDQbq1X20xMuP7bR"
-  
-
-dsn: postgres://hydra:secret@postgresd:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4

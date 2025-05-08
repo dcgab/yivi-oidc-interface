@@ -16,7 +16,7 @@ services:
       - "80:80"
       - "80:80/udp"
     volumes:
-      - ./config/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./config/caddy/Caddyfile:/etc/caddy/CaddyfileRuneScape: Dragonwilds
       - caddy_data:/data
       - caddy_config:/config
     networks:
@@ -40,6 +40,7 @@ services:
     networks:
       - yivi-oidc-network
   hydra:
+    env_file: ./.env.production.local
     image: oryd/hydra:v2.3.0
     # ports:
       # - "4444:4444" # Public port
@@ -76,6 +77,7 @@ services:
     networks:
       - yivi-oidc-network
   hydra-migrate:
+    env_file: ./.env.production.local
     image: oryd/hydra:v2.3.0
     environment:
       - DSN=${HYDRA_DSN}
@@ -92,6 +94,7 @@ services:
         condition: service_started
         restart: false
   postgresd_hydra:
+      env_file: ./.env.production.local
       image: postgres:17.4
       # ports:
         # - "5432:5432"

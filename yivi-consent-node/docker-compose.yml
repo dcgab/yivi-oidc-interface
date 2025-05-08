@@ -31,21 +31,6 @@ services:
       - type: bind
         source: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/config/hydra
         target: /etc/config/hydra
-    # volumes:
-      # - type: volume
-      #   source: hydra-sqlite
-      #   target: /var/lib/sqlite
-      #   read_only: false
-      # - type: bind
-      #   source: ./contrib/quickstart/5-min
-      #   target: /etc/config/hydra
-    environment:
-      - SECRETS_SYSTEM=${SECRETS_SYSTEM}
-      - DSN=${HYDRA_DSN}
-      # - URLS_SELF_ISSUER=https://localhost:4444/
-      # - URLS_CONSENT=http://localhost:3000/consent
-      # - URLS_LOGIN=http://localhost:3000/login
-    restart: unless-stopped
     depends_on:
       hydra-migrate:
         condition: service_completed_successfully
@@ -57,8 +42,6 @@ services:
       - yivi-oidc-network
   hydra-migrate:
     image: oryd/hydra:v2.3.0
-    environment:
-      - DSN=${HYDRA_DSN}
     command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
     restart: on-failure
     networks:
@@ -76,8 +59,6 @@ services:
       ports:
         - "5432:5432"
       environment:
-        - POSTGRES_USER=${DB_USER}
-        - POSTGRES_PASSWORD=${DB_PASSWORD}
         - POSTGRES_DB=hydra
       volumes:
         - postgres-hydra-data:/var/lib/postgresql/data
