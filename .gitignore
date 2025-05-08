@@ -1,5 +1,5 @@
-vendor/schemes/irma-demo
-vendor/schemes/pbdf
+vendor/schemes/irma-demo*
+vendor/schemes/pbdf*
 
 kratos.yml
 
