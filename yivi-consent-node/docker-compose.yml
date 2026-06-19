@@ -3,14 +3,17 @@
 services:
   yivi_consent_node:
     build: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/.
-    env_file: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/.env
+    # env_file: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/.env
+    environment:
+      - HYDRA_ADMIN_URL=http://hydra:4445
+      - IRMA_SERVER_URL=http://irma_server:8088
     ports: 
       - 3000:3000
     networks:
       - yivi-oidc-network
   irma_server:
     image: ghcr.io/privacybydesign/irma:latest
-    command: server --verbose --jwt-privkey-file /irmago/config/private.pem --url "http://145.116.167.128:port"
+    command: server --verbose --jwt-privkey-file /irmago/config/private.pem --url "http://145.137.161.80:8088"
     ports:
       - 8088:8088
     volumes:
@@ -27,6 +30,14 @@ services:
       - "5555:5555" # Port for hydra token user
     # command: serve -c /etc/config/hydra/hydra.yml all --dev
     command: serve -c /etc/config/hydra/hydra.yml all --dev
+    environment: 
+       - DSN=postgres://ory:secret@postgresd_hydra:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+       - SECRETS_SYSTEM=Sj2ypq-TJi9NjgWW10FhtE-BgOpVaWJB
+       - URLS_SELF_ISSUER=http://host.docker.internal:4444
+       - URLS_SELF_PUBLIC=http://host.docker.internal:4444/
+       - URLS_CONSENT=http://127.0.0.1:3000/consent
+       - URLS_LOGIN=http://127.0.0.1:3000/login
+       - URLS_LOGOUT=http://127.0.0.1:3000/logout
     volumes:
       - type: bind
         source: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/config/hydra
@@ -43,6 +54,9 @@ services:
   hydra-migrate:
     image: oryd/hydra:v2.3.0
     command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    environment:
+      - DSN=postgres://ory:secret@postgresd_hydra:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
+      - SECRETS_SYSTEM=Sj2ypq-TJi9NjgWW10FhtE-BgOpVaWJB
     restart: on-failure
     networks:
       - yivi-oidc-network
@@ -60,6 +74,8 @@ services:
         - "5432:5432"
       environment:
         - POSTGRES_DB=hydra
+        - POSTGRES_USER=ory
+        - POSTGRES_PASSWORD=secret
       volumes:
         - postgres-hydra-data:/var/lib/postgresql/data
       networks:

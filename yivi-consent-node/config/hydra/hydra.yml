@@ -22,3 +22,5 @@ oidc:
     supported_types:
       - pairwise
       - public
+    pairwise:
+      salt: vy6rXCIIDqHtKRHPx8zJopWlyg9A9302

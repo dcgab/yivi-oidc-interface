@@ -79,9 +79,9 @@ services:
     env_file: /home/dennis/internship/yivi-oidc-interface/examples/kratos-yivi/.env
     ports:
       - "5433:5432"
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    environment: 
+      - POSTGRES_USER=ory 
+      - POSTGRES_PASSWORD=secret 
       - POSTGRES_DB=kratos
     networks:
       - yivi-oidc-network

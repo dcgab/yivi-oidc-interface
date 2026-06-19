@@ -19,7 +19,7 @@ router.get('/', async function(req: Request, res: Response, next: NextFunction) 
   let logout_url = ''
   
   try {
-    let logoutRes = await ory.createBrowserLogoutFlow({cookie: req.header("cookie"), returnTo: `${process.env.APP_URL}`})
+    let logoutRes = await ory.createBrowserLogoutFlow({cookie: req.header("cookie"), returnTo: `${process.env.APP_URL}`});
     logout_url = logoutRes.data.logout_url
   } catch(error: any) {
     console.log('Could not found session for logout_url');
