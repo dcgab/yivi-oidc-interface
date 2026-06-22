@@ -2,8 +2,7 @@
 #   - ../vendor/irmago/docker-compose.yml
 services:
   yivi_consent_node:
-    build: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/.
-    # env_file: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/.env
+    build: ./yivi-consent-node
     environment:
       - HYDRA_ADMIN_URL=http://hydra:4445
       - IRMA_SERVER_URL=http://irma_server:8088
@@ -17,9 +16,7 @@ services:
     ports:
       - 8088:8088
     volumes:
-      - type: bind
-        source: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/config/yivi
-        target: /irmago/config
+      - ./yivi-consent-node/config/yivi:/irmago/config:ro,z
     networks:
       - yivi-oidc-network
   hydra:
@@ -28,46 +25,41 @@ services:
       - "4444:4444" # Public port
       - "4445:4445" # Admin port
       - "5555:5555" # Port for hydra token user
-    # command: serve -c /etc/config/hydra/hydra.yml all --dev
     command: serve -c /etc/config/hydra/hydra.yml all --dev
     environment: 
        - DSN=postgres://ory:secret@postgresd_hydra:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
        - SECRETS_SYSTEM=Sj2ypq-TJi9NjgWW10FhtE-BgOpVaWJB
-       - URLS_SELF_ISSUER=http://host.docker.internal:4444
-       - URLS_SELF_PUBLIC=http://host.docker.internal:4444/
+       - URLS_SELF_ISSUER=http://localhost:4444
+       - URLS_SELF_PUBLIC=http://localhost:4444/
        - URLS_CONSENT=http://127.0.0.1:3000/consent
        - URLS_LOGIN=http://127.0.0.1:3000/login
        - URLS_LOGOUT=http://127.0.0.1:3000/logout
     volumes:
-      - type: bind
-        source: /home/dennis/internship/yivi-oidc-interface/yivi-consent-node/config/hydra
-        target: /etc/config/hydra
+      - ./yivi-consent-node/config/hydra:/etc/config/hydra:ro,z
     depends_on:
       hydra-migrate:
         condition: service_completed_successfully
         restart: false
       postgresd_hydra:
-        condition: service_started
+        condition: service_healthy
         restart: false
     networks:
       - yivi-oidc-network
   hydra-migrate:
     image: oryd/hydra:v2.3.0
-    command: migrate -c /etc/config/hydra/hydra.yml sql -e --yes
+    command: migrate -c /etc/config/hydra/hydra.yml sql up -e --yes
     environment:
       - DSN=postgres://ory:secret@postgresd_hydra:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4
       - SECRETS_SYSTEM=Sj2ypq-TJi9NjgWW10FhtE-BgOpVaWJB
     restart: on-failure
-    networks:
-      - yivi-oidc-network
     volumes:
-      - type: bind
-        source: ./config/hydra
-        target: /etc/config/hydra
+      - ./yivi-consent-node/config/hydra:/etc/config/hydra:ro,z
     depends_on:
       postgresd_hydra:
-        condition: service_started
+        condition: service_healthy
         restart: false
+    networks:
+      - yivi-oidc-network
   postgresd_hydra:
       image: postgres:16.3
       ports:
@@ -76,6 +68,11 @@ services:
         - POSTGRES_DB=hydra
         - POSTGRES_USER=ory
         - POSTGRES_PASSWORD=secret
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ory -d hydra"]
+        interval: 2s
+        timeout: 5s
+        retries: 10
       volumes:
         - postgres-hydra-data:/var/lib/postgresql/data
       networks:

@@ -1,16 +1,16 @@
 #!/bin/env sh
+# Run from repo root (same as start_dev.sh)
 
-code_client=$(docker compose -f hydra-yivi.yml exec hydra \
-    hydra create client \
+docker compose --project-directory . \
+  -f ./yivi-consent-node/docker-compose.yml \
+  -f ./examples/kratos-yivi/docker-compose.yml \
+  exec hydra hydra create client \
     --endpoint http://127.0.0.1:4445 \
+    --id 569a2248-1b94-447b-a47f-3e16f81d7681 \
+    --secret 9NCLbHI2qqC.gFjxjzsK8NuQXA \
+    --name "Yivi Login" \
     --grant-type authorization_code,refresh_token \
     --response-type code,id_token \
-    --format json \
-    --scope openid --scope offline --scope email --scope profile \
-    --redirect-uri http://127.0.0.1:4433/self-service/methods/oidc/callback/yivi)
-
-export code_client_id=$(echo $code_client | jq -r '.client_id')
-export code_client_secret=$(echo $code_client | jq -r '.client_secret')
-
-echo "Client id: $code_client_id"
-echo "Client secret: $code_client_secret"
+    --scope openid,offline,email,profile,pbdf.sidn-pbdf.email.email,pbdf.sidn-pbdf.mobilenumber.mobilenumber,pbdf.gemeente.personalData.firstnames,pbdf.gemeente.personalData.familyname \
+    --redirect-uri http://127.0.0.1:4433/self-service/methods/oidc/callback/yivi \
+    --format json

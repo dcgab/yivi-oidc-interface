@@ -16,92 +16,68 @@ services:
       - "80:80"
       - "80:80/udp"
     volumes:
-      - ./config/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./yivi-consent-node/config/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,z
       - caddy_data:/data
       - caddy_config:/config
     networks:
       - yivi-oidc-network
   yivi_consent_node:
-    build: .
-    # ports: 
-    #   - 3000:3000
+    build: ./yivi-consent-node
     networks:
       - yivi-oidc-network
   irma_server:
-    build: ../vendor/irmago/
-#    image: ghcr.io/privacybydesign/irma:edge
+    build: ./vendor/irmago/
     command: server -vv --jwt-privkey-file /irmago/config/private.pem --url "https://yivi-server.dennisgabeler.nl" -p 8088 --production --no-email true --config /irmago/config/irmaserver.json
-    # ports:
-    #   - 8088:8088
     volumes:
-      - type: bind
-        source: ./config/yivi
-        target: /irmago/config
+      - ./yivi-consent-node/config/yivi:/irmago/config:ro,z
     networks:
       - yivi-oidc-network
   hydra:
-    env_file: ./.env.production.local
+    env_file: ./yivi-consent-node/.env.production.local
     image: oryd/hydra:v2.3.0
-    # ports:
-      # - "4444:4444" # Public port
-      # - "4445:4445" # Admin port
-      # - "5555:5555" # Port for hydra token user
-    # command: serve -c /etc/config/hydra/hydra.yml all --dev
     command: serve -c /etc/config/hydra/hydra-prod.yml all
-    volumes:
-      - type: bind
-        source: ./config/hydra
-        target: /etc/config/hydra
-    # volumes:
-      # - type: volume
-      #   source: hydra-sqlite
-      #   target: /var/lib/sqlite
-      #   read_only: false
-      # - type: bind
-      #   source: ./contrib/quickstart/5-min
-      #   target: /etc/config/hydra
     environment:
       - SECRETS_SYSTEM=${SECRETS_SYSTEM} 
       - DSN=${HYDRA_DSN}
-      # - URLS_SELF_ISSUER=https://localhost:4444/
-      # - URLS_CONSENT=http://localhost:3000/consent
-      # - URLS_LOGIN=http://localhost:3000/login
     restart: unless-stopped
+    volumes:
+      - ./yivi-consent-node/config/hydra:/etc/config/hydra:ro,z
     depends_on:
       hydra-migrate:
         condition: service_completed_successfully
         restart: false
       postgresd_hydra:
-        condition: service_started
+        condition: service_healthy
         restart: false
     networks:
       - yivi-oidc-network
   hydra-migrate:
-    env_file: ./.env.production.local
+    env_file: ./yivi-consent-node/.env.production.local
     image: oryd/hydra:v2.3.0
     environment:
       - DSN=${HYDRA_DSN}
-    command: migrate -c /etc/config/hydra/hydra-prod.yml sql -e --yes
+    command: migrate -c /etc/config/hydra/hydra-prod.yml sql up -e --yes
     restart: on-failure
-    networks:
-      - yivi-oidc-network
     volumes:
-      - type: bind
-        source: ./config/hydra
-        target: /etc/config/hydra
+      - ./yivi-consent-node/config/hydra:/etc/config/hydra:ro,z
     depends_on:
       postgresd_hydra:
-        condition: service_started
+        condition: service_healthy
         restart: false
+    networks:
+      - yivi-oidc-network
   postgresd_hydra:
-      env_file: ./.env.production.local
+      env_file: ./yivi-consent-node/.env.production.local
       image: postgres:17.4
-      # ports:
-        # - "5432:5432"
       environment:
         - POSTGRES_USER=${DB_USER}
         - POSTGRES_PASSWORD=${DB_PASSWORD}
         - POSTGRES_DB=hydra
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ory -d hydra"]
+        interval: 2s
+        timeout: 5s
+        retries: 10
       volumes:
         - postgres-hydra-data:/var/lib/postgresql/data
       networks:
