@@ -1,20 +1,20 @@
 version: v0.13.0
 
-dsn: postgres://ory:secret@postgresd_kratos:5432/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
+dsn: ${KRATOS_DSN}
 
 serve:
   public:
-    base_url: https://demo-app.dennisgabeler.nl/
+    base_url: ${KRATOS_PUBLIC_URL}
     cors:
       enabled: true
   admin:
     base_url: http://kratos:4434/
 
 selfservice:
-  default_browser_return_url: https://demo-app.dennisgabeler.nl/
+  default_browser_return_url: ${KRATOS_DEFAULT_BROWSER_RETURN_URL}
   allowed_return_urls:
-    - https://demo-app.dennisgabeler.nl
-    - https://demo-app.dennisgabeler.nl/ui/
+    - ${KRATOS_DEFAULT_BROWSER_RETURN_URL}
+    - ${KRATOS_UI_PUBLIC_URL}/
     - http://localhost:19006/Callback
     - exp://localhost:8081/--/Callback
 
@@ -36,8 +36,8 @@ selfservice:
         providers:
           - id: linkedin
             provider: generic
-            client_id: 78y8yopnonfa3n
-            client_secret: MHrQ5iBF110wCoJr
+            client_id: LINKEDIN_CLIENT_ID_PLACEHOLDER
+            client_secret: LINKEDIN_CLIENT_SECRET_PLACEHOLDER
             issuer_url: https://www.linkedin.com/oauth
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gewogIGVtYWlsX3ZlcmlmaWVkOiBmYWxzZSwKfSArIHN0ZC5leHRWYXIoJ2NsYWltcycpOwp7CiAgaWRlbnRpdHk6IHsKICAgIHRyYWl0czogewogICAgICAvLyBBbGxvd2luZyB1bnZlcmlmaWVkIGVtYWlsIGFkZHJlc3NlcyBlbmFibGVzIGFjY291bnQKICAgICAgLy8gZW51bWVyYXRpb24gYXR0YWNrcywgIGlmIHRoZSB2YWx1ZSBpcyB1c2VkIGZvcgogICAgICAvLyB2ZXJpZmljYXRpb24gb3IgYXMgYSBwYXNzd29yZCBsb2dpbiBpZGVudGlmaWVyLgogICAgICAvLwogICAgICAvLyBUaGVyZWZvcmUgd2Ugb25seSByZXR1cm4gdGhlIGVtYWlsIGlmIGl0IChhKSBleGlzdHMgYW5kIChiKSBpcyBtYXJrZWQgdmVyaWZpZWQKICAgICAgLy8gYnkgTGlua2VkSW4uCiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyAmJiBjbGFpbXMuZW1haWxfdmVyaWZpZWQgdGhlbiAnZW1haWwnIGVsc2UgbnVsbF06IGNsYWltcy5lbWFpbCwKICAgIH0sCiAgfSwKfQ=="
             scope:
@@ -46,9 +46,9 @@ selfservice:
               - openid
           - id: yivi
             provider: generic
-            client_id: 3a01b26f-8174-493b-a55b-9f067c916d74
-            client_secret: Cr4~OQojVPP0b6GH3EMAUY9EqE
-            issuer_url: https://oidc.dennisgabeler.nl/
+            client_id: ${YIVI_OIDC_CLIENT_ID}
+            client_secret: ${YIVI_OIDC_CLIENT_SECRET}
+            issuer_url: ${YIVI_OIDC_ISSUER_URL}
             # mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyB0aGVuICdlbWFpbCcgZWxzZSBudWxsXTogY2xhaW1zLmVtYWlsLAogICAgICBuYW1lOiB7CiAgICAgICAgICBbaWYgJ3BiZGYuZ2VtZWVudGUucGVyc29uYWxEYXRhLmZpcnN0bmFtZXMnIGluIGNsYWltcyB0aGVuICdmaXJzdCcgZWxzZSBudWxsXTogJ0pvaG4nLAogICAgICAgICAgW2lmICdwYmRmLmdlbWVlbnRlLnBlcnNvbmFsRGF0YS5mYW1pbHluYW1lJyBpbiBjbGFpbXMgdGhlbiAnbGFzdCcgZWxzZSBudWxsXTogJ0RvZScKICAgICAgfSwKICAgICAgW2lmICdwaG9uZV9udW1iZXInIGluIGNsYWltcyB0aGVuICdwaG9uZV9udW1iZXInIGVsc2UgbnVsbF06IGNsYWltcy5waG9uZV9udW1iZXIKICAgIH0sCiAgfSwKfQ"
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyB0aGVuICdlbWFpbCcgZWxzZSBudWxsXTogY2xhaW1zLmVtYWlsLAogICAgICBuYW1lOiB7CiAgICAgICAgICBbaWYgJ3BiZGYuZ2VtZWVudGUucGVyc29uYWxEYXRhLmZpcnN0bmFtZXMnIGluIGNsYWltcy5yYXdfY2xhaW1zIHRoZW4gJ2ZpcnN0JyBlbHNlIG51bGxdOiBzdGQuc3BsaXQoY2xhaW1zLnJhd19jbGFpbXNbJ3BiZGYuZ2VtZWVudGUucGVyc29uYWxEYXRhLmZpcnN0bmFtZXMnXSwgJyAnKVswXSwKICAgICAgICAgIFtpZiAncGJkZi5nZW1lZW50ZS5wZXJzb25hbERhdGEuZmFtaWx5bmFtZScgaW4gY2xhaW1zLnJhd19jbGFpbXMgdGhlbiAnbGFzdCcgZWxzZSBudWxsXTogY2xhaW1zLnJhd19jbGFpbXNbJ3BiZGYuZ2VtZWVudGUucGVyc29uYWxEYXRhLmZhbWlseW5hbWUnXQogICAgICB9LAogICAgICBbaWYgJ3Bob25lX251bWJlcicgaW4gY2xhaW1zIHRoZW4gJ3Bob25lX251bWJlcicgZWxzZSBudWxsXTogY2xhaW1zLnBob25lX251bWJlcgogICAgfSwKICB9LAp9"
             scope:
@@ -61,38 +61,38 @@ selfservice:
 
   flows:
     error:
-      ui_url: https://demo-app.dennisgabeler.nl/ui/error
+      ui_url: ${KRATOS_UI_PUBLIC_URL}/error
 
     settings:
-      ui_url: https://demo-app.dennisgabeler.nl/ui/settings
+      ui_url: ${KRATOS_UI_PUBLIC_URL}/settings
       privileged_session_max_age: 15m
       required_aal: highest_available
 
     recovery:
       enabled: true
-      ui_url: https://demo-app.dennisgabeler.nl/ui/recovery
+      ui_url: ${KRATOS_UI_PUBLIC_URL}/recovery
       use: code
 
     verification:
       enabled: true
-      ui_url: https://demo-app.dennisgabeler.nl/ui/verification
+      ui_url: ${KRATOS_UI_PUBLIC_URL}/verification
       use: code
       after:
-        default_browser_return_url: https://demo-app.dennisgabeler.nl/ui/
+        default_browser_return_url: ${KRATOS_UI_PUBLIC_URL}/
 
     logout:
       after:
-        default_browser_return_url: https://demo-app.dennisgabeler.nl/ui/login
+        default_browser_return_url: ${KRATOS_UI_PUBLIC_URL}/login
 
     login:
-      ui_url: https://demo-app.dennisgabeler.nl/ui/login
+      ui_url: ${KRATOS_UI_PUBLIC_URL}/login
       lifespan: 10m
       after:
-        default_browser_return_url: https://demo-app.dennisgabeler.nl?from=login
+        default_browser_return_url: ${KRATOS_DEFAULT_BROWSER_RETURN_URL}
 
     registration:
       lifespan: 10m
-      ui_url: https://demo-app.dennisgabeler.nl/ui/registration
+      ui_url: ${KRATOS_UI_PUBLIC_URL}/registration
       after:
         password:
           hooks:
@@ -101,8 +101,8 @@ selfservice:
         oidc:
           hooks:
             - hook: session
-          default_browser_return_url: https://demo-app.dennisgabeler.nl?from=login
-        default_browser_return_url: https://demo-app.dennisgabeler.nl?from=registration
+          default_browser_return_url: ${KRATOS_DEFAULT_BROWSER_RETURN_URL}
+        default_browser_return_url: ${KRATOS_DEFAULT_BROWSER_RETURN_URL}
 
 log:
   level: debug
@@ -111,9 +111,9 @@ log:
 
 secrets:
   cookie:
-    - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+    - ${KRATOS_COOKIE_SECRET}
   cipher:
-    - 32-LONG-SECRET-NOT-SECURE-AT-ALL
+    - ${KRATOS_CIPHER_SECRET}
 
 ciphers:
   algorithm: xchacha20-poly1305

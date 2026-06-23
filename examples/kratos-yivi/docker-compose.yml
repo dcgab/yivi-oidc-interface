@@ -3,20 +3,23 @@ services:
     build: ./examples/kratos-yivi/ory_auth_demo
     env_file: ./examples/kratos-yivi/.env
     ports:
-      - "4000:4000"
+      - "${ORY_AUTH_DEMO_PORT}:4000"
     environment:
-      - PORT=4000
-      - ORY_SDK_URL=http://host.docker.internal:4433
+      - PORT=${ORY_AUTH_DEMO_PORT}
+      - ORY_SDK_URL=${ORY_SDK_URL}
+      - ORY_UI_URL=${ORY_UI_URL}
+      - APP_URL=${APP_URL}
     networks:
       - yivi-oidc-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
   kratos-migrate:
     image: oryd/kratos:v1.3.0
     command: -c /etc/config/kratos/kratos.yml migrate sql -e --yes
     env_file: ./examples/kratos-yivi/.env
     environment:
-      - DSN=postgres://ory:secret@postgresd_kratos:5432/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
+      - DSN=${KRATOS_DSN}
     restart: on-failure
     volumes:
       - ./examples/kratos-yivi/config/kratos:/etc/config/kratos:ro,z
@@ -26,25 +29,27 @@ services:
         restart: false
     networks:
       - yivi-oidc-network
+
   kratos-selfservice-ui-node:
     image: oryd/kratos-selfservice-ui-node:v1.3.1
     env_file: ./examples/kratos-yivi/.env
     environment:
-      - KRATOS_PUBLIC_URL=http://host.docker.internal:4433
-      - KRATOS_BROWSER_URL=http://127.0.0.1:4433/
-      - HYDRA_ADMIN_URL=http://hydra:4445/
-      - COOKIE_SECRET=changeme
-      - CSRF_COOKIE_NAME=ory_csrf_ui
-      - CSRF_COOKIE_SECRET=changeme 
-      - PORT=4455
-      - SECURITY_MODE=
+      - KRATOS_PUBLIC_URL=${KRATOS_INTERNAL_PUBLIC_URL}
+      - KRATOS_BROWSER_URL=${KRATOS_BROWSER_URL}
+      - HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL}
+      - COOKIE_SECRET=${KRATOS_UI_COOKIE_SECRET}
+      - CSRF_COOKIE_NAME=${KRATOS_UI_CSRF_COOKIE_NAME}
+      - CSRF_COOKIE_SECRET=${KRATOS_UI_CSRF_COOKIE_SECRET}
+      - PORT=${KRATOS_UI_PORT}
+      - SECURITY_MODE=${KRATOS_UI_SECURITY_MODE}
     ports:
-      - "4455:4455"
+      - "${KRATOS_UI_PORT}:4455"
     networks:
       - yivi-oidc-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: on-failure
+
   kratos:
     depends_on:
       kratos-migrate:
@@ -58,29 +63,37 @@ services:
     network_mode: host
     restart: unless-stopped
     environment:
-      - LOG_LEVEL=trace
+      - DSN=${KRATOS_HOST_DSN}
+      - LOG_LEVEL=${KRATOS_LOG_LEVEL}
+      - SECRETS_COOKIE_0=${KRATOS_COOKIE_SECRET}
+      - SECRETS_CIPHER_0=${KRATOS_CIPHER_SECRET}
+      - SERVE_PUBLIC_BASE_URL=${KRATOS_PUBLIC_URL}
+      - SERVE_ADMIN_BASE_URL=http://127.0.0.1:4434/
+      - SELFSERVICE_DEFAULT_BROWSER_RETURN_URL=${KRATOS_DEFAULT_BROWSER_RETURN_URL}
     command: serve -c /etc/config/kratos/kratos.yml --dev --watch-courier
     volumes:
       - ./examples/kratos-yivi/config/kratos:/etc/config/kratos:ro,z
+
   mailslurper:
     image: oryd/mailslurper:latest-smtps
     ports:
-      - '4436:4436'
-      - '4437:4437'
-      - '1025:1025'
+      - "4436:4436"
+      - "4437:4437"
+      - "1025:1025"
     networks:
       - yivi-oidc-network
+
   postgresd_kratos:
     image: postgres:16.2
     env_file: ./examples/kratos-yivi/.env
     ports:
       - "5433:5432"
-    environment: 
-      - POSTGRES_USER=ory 
-      - POSTGRES_PASSWORD=secret 
-      - POSTGRES_DB=kratos
+    environment:
+      - POSTGRES_USER=${KRATOS_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${KRATOS_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${KRATOS_POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ory -d kratos"]
+      test: ["CMD-SHELL", "pg_isready -U ${KRATOS_POSTGRES_USER} -d ${KRATOS_POSTGRES_DB}"]
       interval: 2s
       timeout: 5s
       retries: 10
@@ -88,10 +101,10 @@ services:
       - yivi-oidc-network
     volumes:
       - postgres-kratos-data:/var/lib/postgresql/data
-    
 
 networks:
   yivi-oidc-network:
+
 volumes:
   postgres-hydra-data:
   postgres-kratos-data:

@@ -1,11 +1,48 @@
-#!/bin/env sh
+#!/usr/bin/env sh
+set -eu
 
-. ./create_client.sh
+load_env() {
+  env_file="$1"
+  [ -f "$env_file" ] || return 0
 
-#docker compose -f hydra-yivi.yml exec hydra \
-    hydra perform authorization-code \
-    --client-id $code_client_id \
-    --client-secret $code_client_secret \
-    --endpoint http://127.0.0.1:3000/ \
-    --port 5555 \
-    --scope openid --scope offline
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ''|\#*) continue ;;
+      *=*) ;;
+      *) continue ;;
+    esac
+
+    key=${line%%=*}
+    value=${line#*=}
+    case "$key" in
+      *[!A-Za-z0-9_]*|'') continue ;;
+    esac
+
+    case "$value" in
+      \"*\") value=${value#\"}; value=${value%\"} ;;
+      \'*\') value=${value#\'}; value=${value%\'} ;;
+    esac
+
+    export "$key=$value"
+  done < "$env_file"
+}
+
+if [ -f ./yivi-consent-node/.env ]; then
+  load_env ./yivi-consent-node/.env
+fi
+if [ -f ./examples/kratos-yivi/.env ]; then
+  load_env ./examples/kratos-yivi/.env
+fi
+
+: "${YIVI_OIDC_CLIENT_ID:?Set YIVI_OIDC_CLIENT_ID in examples/kratos-yivi/.env}"
+: "${YIVI_OIDC_CLIENT_SECRET:?Set YIVI_OIDC_CLIENT_SECRET in examples/kratos-yivi/.env}"
+
+HYDRA_PUBLIC_URL="${HYDRA_PUBLIC_URL:-http://127.0.0.1:4444}"
+
+hydra perform authorization-code \
+  --client-id "$YIVI_OIDC_CLIENT_ID" \
+  --client-secret "$YIVI_OIDC_CLIENT_SECRET" \
+  --endpoint "$HYDRA_PUBLIC_URL" \
+  --port 5555 \
+  --scope openid \
+  --scope offline

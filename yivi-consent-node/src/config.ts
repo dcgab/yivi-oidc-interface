@@ -1,18 +1,75 @@
+import dotenv from 'dotenv';
 // @ts-ignore
 import IrmaBackend from '@privacybydesign/irma-backend';
-import { Configuration, OAuth2Api } from "@ory/client"
+import { Configuration, OAuth2Api } from "@ory/client";
 
-// const irmaBackend = new IrmaBackend("http://irma_server:8088", {serverToken: false, debugging: true})
-const irmaBackend = new IrmaBackend(process.env.IRMA_SERVER_URL, {serverToken: process.env.IRMA_SERVER_TOKEN, debugging: true})
+dotenv.config();
+
+type RuntimeConfig = {
+  port: number;
+  hydraAdminUrl: string;
+  irmaServerUrl: string;
+  irmaServerToken: string | false;
+  yiviBackendDebug: boolean;
+};
+
+const parseBoolean = (name: string, defaultValue: boolean): boolean => {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    return defaultValue;
+  }
+  if (['true', '1', 'yes', 'on'].includes(value.toLowerCase())) {
+    return true;
+  }
+  if (['false', '0', 'no', 'off'].includes(value.toLowerCase())) {
+    return false;
+  }
+  throw new Error(`Invalid configuration ${name}: expected boolean value`);
+};
+
+const required = (name: string): string => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required configuration: ${name}`);
+  }
+  return value;
+};
+
+const optionalToken = (name: string): string | false => {
+  const value = process.env[name];
+  return value && value.trim() !== '' ? value : false;
+};
+
+const parsePort = (): number => {
+  const raw = process.env.PORT ?? '3000';
+  const port = Number(raw);
+  if (!Number.isInteger(port) || port <= 0 || port > 65535) {
+    throw new Error(`Invalid configuration PORT: expected integer between 1 and 65535`);
+  }
+  return port;
+};
+
+const runtimeConfig: RuntimeConfig = {
+  port: parsePort(),
+  hydraAdminUrl: required('HYDRA_ADMIN_URL'),
+  irmaServerUrl: required('IRMA_SERVER_URL'),
+  irmaServerToken: optionalToken('IRMA_SERVER_TOKEN'),
+  yiviBackendDebug: parseBoolean('YIVI_BACKEND_DEBUG', false),
+};
+
+const irmaBackend = new IrmaBackend(runtimeConfig.irmaServerUrl, {
+  serverToken: runtimeConfig.irmaServerToken,
+  debugging: runtimeConfig.yiviBackendDebug,
+});
 
 const configuration = new Configuration({
-    basePath: process.env.HYDRA_ADMIN_URL,
-  })
-  
-  const hydraAdmin = new OAuth2Api(configuration)
+  basePath: runtimeConfig.hydraAdminUrl,
+});
+
+const hydraAdmin = new OAuth2Api(configuration);
 
 export {
-    irmaBackend,
-    hydraAdmin
-
+  runtimeConfig,
+  irmaBackend,
+  hydraAdmin,
 };

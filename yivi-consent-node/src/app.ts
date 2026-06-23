@@ -4,6 +4,7 @@ import express, {  } from "express";
 import ViteExpress from "vite-express"
 import dotenv from 'dotenv';
 dotenv.config();
+import { runtimeConfig } from './config';
 
 import login from './routes/login';
 import start from './routes/start';
@@ -46,6 +47,6 @@ app.all('*', (_ , res) => {
   res.sendStatus(404);
 })
 
-ViteExpress.listen(app, 3000, () =>
-  console.log("Server is listening on port 3000..."),
+ViteExpress.listen(app, runtimeConfig.port, () =>
+  console.log(`Server is listening on port ${runtimeConfig.port}...`),
 );

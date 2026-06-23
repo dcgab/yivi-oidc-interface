@@ -5,9 +5,16 @@ import './index.css'
 import yivi from '@privacybydesign/yivi-frontend';
 import { jwtDecode } from 'jwt-decode';
 
+const yiviBackendUrl = import.meta.env.VITE_YIVI_BACKEND_URL;
+if (!yiviBackendUrl) {
+  throw new Error('Missing required frontend configuration: VITE_YIVI_BACKEND_URL');
+}
+
+const yiviFrontendDebug = String(import.meta.env.VITE_YIVI_FRONTEND_DEBUG ?? 'false').toLowerCase() === 'true';
+
 let options = {
   // Developer options
-  debugging: true,
+  debugging: yiviFrontendDebug,
 
   // Front-end options
   language: 'en',
@@ -18,8 +25,7 @@ let options = {
 
   // Back-end options
   session: {
-    // Point this to your IRMA server:
-    url: 'http://127.0.0.1:3000',
+    url: yiviBackendUrl,
     start: {
       url: (o) => `${o.url}/start/${(new URLSearchParams(location.search)).get('login_challenge')}`,
       method: 'GET',

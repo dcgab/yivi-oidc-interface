@@ -22,9 +22,11 @@ router.get('/', async function(req: Request, res: Response, next: NextFunction) 
     let logoutRes = await ory.createBrowserLogoutFlow({cookie: req.header("cookie"), returnTo: `${process.env.APP_URL}`});
     logout_url = logoutRes.data.logout_url
   } catch(error: any) {
-    console.log('Could not found session for logout_url');
-    console.log(error.response.data.error);
-    
+    const oryError = error?.response?.data?.error;
+    if (oryError?.id !== 'session_inactive') {
+      console.log('Failed to retrieve logout url');
+      console.log(oryError ?? error);
+    }
   }
 
   try {

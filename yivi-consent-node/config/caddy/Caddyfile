@@ -2,19 +2,19 @@
 	#local_certs
 }
 
-oidc.dennisgabeler.nl {
+{$CADDY_OIDC_HOST} {
 	reverse_proxy http://hydra:4444
 }
 
-yivi-server.dennisgabeler.nl {
+{$CADDY_YIVI_SERVER_HOST} {
 	reverse_proxy http://irma_server:8088
 }
 
-yivi.dennisgabeler.nl {
+{$CADDY_YIVI_FRONTEND_HOST} {
 	reverse_proxy http://yivi_consent_node:3000
 }
 
-demo-app.dennisgabeler.nl {
+{$CADDY_DEMO_APP_HOST} {
 	@kratos_paths {
 		path /self-service*
 		path /sessions*

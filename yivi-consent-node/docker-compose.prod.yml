@@ -1,15 +1,7 @@
-# include:
-#   - ../vendor/irmago/docker-compose.yml
-
-# Domains for demo production
-# demo-app.dennisgabeler.nl: Demo application acting as the OIDC client
-# oidc.dennisgabeler.nl: OIDC endpoint to which OIDC clients will connect to
-# yivi.dennisgabeler.nl: Yivi frontend used in the Yivi authentication flow
-# yivi-server.dennisgabeler.nl: Yivi/IRMA server handling Yivi sessions for disclosure requests
-
 services:
   proxy:
     image: caddy:2.10.0-alpine
+    env_file: ./yivi-consent-node/.env
     ports:
       - "443:443"
       - "443:443/udp"
@@ -21,24 +13,38 @@ services:
       - caddy_config:/config
     networks:
       - yivi-oidc-network
+
   yivi_consent_node:
-    build: ./yivi-consent-node
+    build:
+      context: ./yivi-consent-node
+      args:
+        VITE_YIVI_BACKEND_URL: ${VITE_YIVI_BACKEND_URL}
+        VITE_YIVI_FRONTEND_DEBUG: ${VITE_YIVI_FRONTEND_DEBUG}
+    env_file: ./yivi-consent-node/.env
     networks:
       - yivi-oidc-network
+
   irma_server:
     build: ./vendor/irmago/
-    command: server -vv --jwt-privkey-file /irmago/config/private.pem --url "https://yivi-server.dennisgabeler.nl" -p 8088 --production --no-email true --config /irmago/config/irmaserver.json
+    command: server -vv --jwt-privkey-file /irmago/config/private.pem --url "${IRMA_SERVER_PUBLIC_URL}" -p 8088 --production --no-email true --config /irmago/config/irmaserver.json
     volumes:
-      - ./yivi-consent-node/config/yivi:/irmago/config:ro,z
+      - ${YIVI_RUNTIME_DIR}:/irmago/config:ro,z
     networks:
       - yivi-oidc-network
+
   hydra:
-    env_file: ./yivi-consent-node/.env.production.local
+    env_file: ./yivi-consent-node/.env
     image: oryd/hydra:v2.3.0
     command: serve -c /etc/config/hydra/hydra-prod.yml all
     environment:
-      - SECRETS_SYSTEM=${SECRETS_SYSTEM} 
+      - SECRETS_SYSTEM=${HYDRA_SECRETS_SYSTEM}
       - DSN=${HYDRA_DSN}
+      - URLS_SELF_ISSUER=${HYDRA_ISSUER_URL}
+      - URLS_SELF_PUBLIC=${HYDRA_SELF_PUBLIC_URL}
+      - URLS_CONSENT=${HYDRA_CONSENT_URL}
+      - URLS_LOGIN=${HYDRA_LOGIN_URL}
+      - URLS_LOGOUT=${HYDRA_LOGOUT_URL}
+      - OIDC_SUBJECT_IDENTIFIERS_PAIRWISE_SALT=${HYDRA_SUBJECT_PAIRWISE_SALT}
     restart: unless-stopped
     volumes:
       - ./yivi-consent-node/config/hydra:/etc/config/hydra:ro,z
@@ -51,8 +57,9 @@ services:
         restart: false
     networks:
       - yivi-oidc-network
+
   hydra-migrate:
-    env_file: ./yivi-consent-node/.env.production.local
+    env_file: ./yivi-consent-node/.env
     image: oryd/hydra:v2.3.0
     environment:
       - DSN=${HYDRA_DSN}
@@ -66,25 +73,28 @@ services:
         restart: false
     networks:
       - yivi-oidc-network
+
   postgresd_hydra:
-      env_file: ./yivi-consent-node/.env.production.local
-      image: postgres:17.4
-      environment:
-        - POSTGRES_USER=${DB_USER}
-        - POSTGRES_PASSWORD=${DB_PASSWORD}
-        - POSTGRES_DB=hydra
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U ory -d hydra"]
-        interval: 2s
-        timeout: 5s
-        retries: 10
-      volumes:
-        - postgres-hydra-data:/var/lib/postgresql/data
-      networks:
-        - yivi-oidc-network
+    env_file: ./yivi-consent-node/.env
+    image: postgres:17.4
+    environment:
+      - POSTGRES_USER=${HYDRA_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${HYDRA_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${HYDRA_POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${HYDRA_POSTGRES_USER} -d ${HYDRA_POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres-hydra-data:/var/lib/postgresql/data
+    networks:
+      - yivi-oidc-network
+
 volumes:
   postgres-hydra-data:
   caddy_data:
   caddy_config:
+
 networks:
   yivi-oidc-network:

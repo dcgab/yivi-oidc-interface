@@ -1,17 +1,17 @@
 version: v0.13.0
 
-dsn: postgres://ory:secret@postgresd_kratos:5432/kratos?sslmode=disable&max_conns=20&max_idle_conns=4
+dsn: ${KRATOS_DSN}
 
 serve:
   public:
-    base_url: http://127.0.0.1:4433/
+    base_url: ${KRATOS_PUBLIC_URL}
     cors:
       enabled: true
   admin:
-    base_url: http://kratos:4434/
+    base_url: ${KRATOS_ADMIN_URL}
 
 selfservice:
-  default_browser_return_url: http://127.0.0.1:4000/
+  default_browser_return_url: ${KRATOS_DEFAULT_BROWSER_RETURN_URL}
   allowed_return_urls:
     - http://127.0.0.1:4000
     - http://127.0.0.1:4455
@@ -36,8 +36,8 @@ selfservice:
         providers:
           - id: linkedin
             provider: generic
-            client_id: <client_id>
-            client_secret: <client_secret>
+            client_id: ${YIVI_OIDC_CLIENT_ID}
+            client_secret: ${YIVI_OIDC_CLIENT_SECRET}
             issuer_url: https://www.linkedin.com/oauth
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gewogIGVtYWlsX3ZlcmlmaWVkOiBmYWxzZSwKfSArIHN0ZC5leHRWYXIoJ2NsYWltcycpOwp7CiAgaWRlbnRpdHk6IHsKICAgIHRyYWl0czogewogICAgICAvLyBBbGxvd2luZyB1bnZlcmlmaWVkIGVtYWlsIGFkZHJlc3NlcyBlbmFibGVzIGFjY291bnQKICAgICAgLy8gZW51bWVyYXRpb24gYXR0YWNrcywgIGlmIHRoZSB2YWx1ZSBpcyB1c2VkIGZvcgogICAgICAvLyB2ZXJpZmljYXRpb24gb3IgYXMgYSBwYXNzd29yZCBsb2dpbiBpZGVudGlmaWVyLgogICAgICAvLwogICAgICAvLyBUaGVyZWZvcmUgd2Ugb25seSByZXR1cm4gdGhlIGVtYWlsIGlmIGl0IChhKSBleGlzdHMgYW5kIChiKSBpcyBtYXJrZWQgdmVyaWZpZWQKICAgICAgLy8gYnkgTGlua2VkSW4uCiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyAmJiBjbGFpbXMuZW1haWxfdmVyaWZpZWQgdGhlbiAnZW1haWwnIGVsc2UgbnVsbF06IGNsYWltcy5lbWFpbCwKICAgIH0sCiAgfSwKfQ=="
             scope:
@@ -48,7 +48,7 @@ selfservice:
             provider: generic
             client_id: <client_id>
             client_secret: <client_secret>
-            issuer_url: http://hydra:4444/
+            issuer_url: ${YIVI_OIDC_ISSUER_URL}
             # mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIC8vIEFsbG93aW5nIHVudmVyaWZpZWQgZW1haWwgYWRkcmVzc2VzIGVuYWJsZXMgYWNjb3VudAogICAgICAvLyBlbnVtZXJhdGlvbiBhdHRhY2tzLCAgaWYgdGhlIHZhbHVlIGlzIHVzZWQgZm9yCiAgICAgIC8vIHZlcmlmaWNhdGlvbiBvciBhcyBhIHBhc3N3b3JkIGxvZ2luIGlkZW50aWZpZXIuCiAgICAgIC8vCiAgICAgIC8vIElmIGNvbm5lY3Rpbmcgb25seSB0byB5b3VyIG9yZ2FuaXphdGlvbiAob25lIHRlbmFudCksIGNsYWltcy5lbWFpbCBpcyBzYWZlIHRvIHVzZQogICAgICAvLyBpZiB5b3UgaGF2ZW4ndCBhY3RpdmVseSBkaXNhYmxlZCBlLW1haWwgdmVyaWZpY2F0aW9uIGR1cmluZyBzaWduLXVwLgogICAgICAvLwogICAgICAvLyBUaGUgZW1haWwgbWlnaHQgYmUgZW1wdHkgaWYgdGhlIGFjY291bnQgaXNuJ3QgbGlua2VkIHRvIGFuIGVtYWlsIGFkZHJlc3MuCiAgICAgIC8vIEZvciBhIGh1bWFuIHJlYWRhYmxlIGlkZW50aWZpZXIsIGNvbnNpZGVyIHVzaW5nIHRoZSAicHJlZmVycmVkX3VzZXJuYW1lIiBjbGFpbS4KICAgICAgW2lmICdlbWFpbCcgaW4gY2xhaW1zIHRoZW4gJ2VtYWlsJyBlbHNlIG51bGxdOiBjbGFpbXMuZW1haWwsCiAgICB9LAogIH0sCn0="
             mapper_url: "base64://bG9jYWwgY2xhaW1zID0gc3RkLmV4dFZhcignY2xhaW1zJyk7CnsKICBpZGVudGl0eTogewogICAgdHJhaXRzOiB7CiAgICAgIFtpZiAnZW1haWwnIGluIGNsYWltcyB0aGVuICdlbWFpbCcgZWxzZSBudWxsXTogY2xhaW1zLmVtYWlsLAogICAgICBuYW1lOiB7CiAgICAgICAgICBbaWYgJ2dpdmVuX25hbWUnIGluIGNsYWltcyB0aGVuICdmaXJzdCcgZWxzZSBudWxsXTogY2xhaW1zLmdpdmVuX25hbWUsCiAgICAgICAgICBbaWYgJ2ZhbWlseV9uYW1lJyBpbiBjbGFpbXMgdGhlbiAnbGFzdCcgZWxzZSBudWxsXTogY2xhaW1zLmZhbWlseV9uYW1lCiAgICAgIH0KICAgIH0sCiAgfSwKfQ=="
             scope:
@@ -102,9 +102,9 @@ log:
 
 secrets:
   cookie:
-    - PLEASE-CHANGE-ME-I-AM-VERY-INSECURE
+    - ${KRATOS_COOKIE_SECRET}
   cipher:
-    - 32-LONG-SECRET-NOT-SECURE-AT-ALL
+    - ${KRATOS_CIPHER_SECRET}
 
 ciphers:
   algorithm: xchacha20-poly1305
