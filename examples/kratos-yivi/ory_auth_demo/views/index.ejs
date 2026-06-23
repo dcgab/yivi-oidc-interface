@@ -7,6 +7,11 @@
   </head>
   <body class="mx-auto container">
     <h1 class="text-5xl font-bold text-center my-20">Ory Demo page</h1>
+    <% if(from === 'registration'){%>
+      <h3 class="text-md font-bold bg-gray-100 border border-gray-200 p-4 rounded-lg mb-8">Registration complete. You can now log in.</h3>
+    <% } else if(from === 'login') { %>
+      <h3 class="text-md font-bold bg-gray-100 border border-gray-200 p-4 rounded-lg mb-8">You are now logged in.</h3>
+    <% } %>
     <% if(!session){%>
       <p>You are not logged in</p>
       <a href="<%=ory_ui_url%>/login" class="text-blue-700 underline">Click here to log in</a>
@@ -16,6 +21,8 @@
       <p>Authentication method: <%= session.authentication_methods[0].method%></p>
       <p>OIDC provider: <%= session.authentication_methods[0].provider%></p>
       <p>Email address: <%= session.identity.traits.email%></p>
+      <p>Phone number: <%= session.identity.traits.phone_number%></p>
+      <p>Name: <%= `${session.identity.traits.name.first} ${session.identity.traits.name.last}` %></p>
     <% }%>
     <p class="text-xl font-bold mt-16">Session information:</p>
     <pre class="border-2"><%= session ? JSON.stringify(session, null, 2) : ""%></pre>

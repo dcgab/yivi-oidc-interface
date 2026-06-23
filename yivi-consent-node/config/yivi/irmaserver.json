@@ -1,0 +1,8 @@
+{
+  "requestors": {
+    "oryhydra": {
+      "auth_method": "token",
+      "key": "GENERATE_LOCAL_REQUESTER_TOKEN_WITH_scripts/setup-local-env.sh"
+    }
+  }
+}

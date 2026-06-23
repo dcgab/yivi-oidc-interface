@@ -1,0 +1,110 @@
+services:
+  proxy:
+    networks:
+      - intranet
+
+  ory_auth_demo:
+    build:
+      context: ./examples/kratos-yivi/ory_auth_demo
+      dockerfile: ./Dockerfile
+    env_file: ./examples/kratos-yivi/.env
+    environment:
+      - PORT=${ORY_AUTH_DEMO_PORT}
+      - ORY_SDK_URL=${ORY_SDK_URL}
+      - ORY_UI_URL=${ORY_UI_URL}
+      - APP_URL=${APP_URL}
+    networks:
+      - intranet
+
+  kratos-migrate:
+    image: oryd/kratos:v1.3.0
+    env_file:
+      - path: ./examples/kratos-yivi/.env
+        required: true
+    environment:
+      - DSN=${KRATOS_DSN}
+    command: -c /etc/config/kratos/kratos-prod.yml migrate sql -e --yes
+    restart: on-failure
+    volumes:
+      - ./examples/kratos-yivi/config/kratos:/etc/config/kratos:ro,z
+    depends_on:
+      postgresd_kratos:
+        condition: service_healthy
+        restart: false
+    networks:
+      - intranet
+
+  kratos-selfservice-ui-node:
+    build:
+      context: ./vendor/kratos-selfservice-ui-node
+      dockerfile: ./Dockerfile
+    image: oryd/kratos-selfservice-ui-node:v1.1.0
+    env_file: ./examples/kratos-yivi/.env
+    environment:
+      - KRATOS_PUBLIC_URL=${KRATOS_INTERNAL_PUBLIC_URL}
+      - KRATOS_BROWSER_URL=${KRATOS_BROWSER_URL}
+      - HYDRA_ADMIN_URL=${HYDRA_ADMIN_URL}
+      - COOKIE_SECRET=${KRATOS_UI_COOKIE_SECRET}
+      - CSRF_COOKIE_NAME=${KRATOS_UI_CSRF_COOKIE_NAME}
+      - CSRF_COOKIE_SECRET=${KRATOS_UI_CSRF_COOKIE_SECRET}
+      - PORT=${KRATOS_UI_PORT}
+      - SECURITY_MODE=${KRATOS_UI_SECURITY_MODE}
+    networks:
+      - intranet
+      - yivi-oidc-network
+    restart: on-failure
+
+  kratos:
+    depends_on:
+      kratos-migrate:
+        condition: service_completed_successfully
+        restart: false
+      postgresd_kratos:
+        condition: service_healthy
+        restart: false
+    image: oryd/kratos:v1.3.0
+    restart: unless-stopped
+    env_file: ./examples/kratos-yivi/.env
+    environment:
+      - DSN=${KRATOS_DSN}
+      - LOG_LEVEL=${KRATOS_LOG_LEVEL}
+      - SECRETS_COOKIE_0=${KRATOS_COOKIE_SECRET}
+      - SECRETS_CIPHER_0=${KRATOS_CIPHER_SECRET}
+      - SERVE_PUBLIC_BASE_URL=${KRATOS_PUBLIC_URL}
+      - SERVE_ADMIN_BASE_URL=${KRATOS_ADMIN_URL}
+      - SELFSERVICE_DEFAULT_BROWSER_RETURN_URL=${KRATOS_DEFAULT_BROWSER_RETURN_URL}
+    command: serve -c /etc/config/kratos/kratos-prod.yml
+    volumes:
+      - ./examples/kratos-yivi/config/kratos:/etc/config/kratos:ro,z
+    networks:
+      - intranet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mailslurper:
+    image: oryd/mailslurper:latest-smtps
+    networks:
+      - intranet
+
+  postgresd_kratos:
+    image: postgres:17.4
+    env_file: ./examples/kratos-yivi/.env
+    environment:
+      - POSTGRES_USER=${KRATOS_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${KRATOS_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${KRATOS_POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KRATOS_POSTGRES_USER} -d ${KRATOS_POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - intranet
+    volumes:
+      - postgres-kratos-data:/var/lib/postgresql/data
+
+networks:
+  intranet:
+
+volumes:
+  postgres-kratos-data:

@@ -1,3 +1,6 @@
+vendor/schemes/irma-demo*
+vendor/schemes/pbdf*
+
 kratos.yml
 
 # Logs
@@ -81,6 +84,15 @@ web_modules/
 .env.production.local
 .env.local
 
+# Generated local runtime configuration and secrets
+yivi-consent-node/runtime/
+examples/kratos-yivi/runtime/
+yivi-consent-node/config/yivi/private.pem
+yivi-consent-node/config/yivi/public.pem
+yivi-consent-node/config/yivi/irmaserver.local.json
+*.generated.yml
+*.generated.json
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -130,3 +142,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# ide
+.vscode/
+.codex/
+openspec/
+context/

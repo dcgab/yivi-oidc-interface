@@ -1,7 +1,4 @@
 serve:
-  # public:
-  #   cors: 
-  #     enabled: true
   cookies:
     same_site_mode: Lax
 
@@ -13,10 +10,7 @@ webfinger:
     supported_scope:
       - email
       - profile
-
-oauth2:
-  expose_internal_errors: true
-
+    # auth_url: http://hydra:4444/oauth2/auth
 oidc:
   subject_identifiers:
     supported_types:

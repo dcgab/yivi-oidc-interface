@@ -1,13 +1,20 @@
 
 
 import '@privacybydesign/yivi-css'
-
+import './index.css'
 import yivi from '@privacybydesign/yivi-frontend';
 import { jwtDecode } from 'jwt-decode';
 
+const yiviBackendUrl = import.meta.env.VITE_YIVI_BACKEND_URL;
+if (!yiviBackendUrl) {
+  throw new Error('Missing required frontend configuration: VITE_YIVI_BACKEND_URL');
+}
+
+const yiviFrontendDebug = String(import.meta.env.VITE_YIVI_FRONTEND_DEBUG ?? 'false').toLowerCase() === 'true';
+
 let options = {
   // Developer options
-  debugging: true,
+  debugging: yiviFrontendDebug,
 
   // Front-end options
   language: 'en',
@@ -18,10 +25,9 @@ let options = {
 
   // Back-end options
   session: {
-    // Point this to your IRMA server:
-    url: 'http://127.0.0.1:3000',
+    url: yiviBackendUrl,
     start: {
-      url: (o) => `${o.url}/start`,
+      url: (o) => `${o.url}/start/${(new URLSearchParams(location.search)).get('login_challenge')}`,
       method: 'GET',
     },
     result: {
@@ -38,7 +44,7 @@ const yiviWeb = yivi.newWeb({
 
 yiviWeb.start()
   .then((result: { jwt: string }) => {
-    let secondsRemaining = 3;
+    let secondsRemaining = 0; // TODO: set to other value in production!
     console.log("Successful disclosure! 🎉", jwtDecode(result.jwt));
     setInterval(() => {
       (document.getElementById('redirect-text') as HTMLParagraphElement).textContent = `Success! Redirecting in ${secondsRemaining--}`;
@@ -70,4 +76,21 @@ yiviWeb.start()
     console.error("Couldn't do what you asked 😢", error);
   });
 
-document.getElementById('abort-web')!.onclick = () => yiviWeb.abort();
+document.getElementById('abort-web')!.onclick = () => { 
+  yiviWeb.abort() 
+  const form = document.createElement('form');
+      form.setAttribute('method', 'post');
+      form.setAttribute('action', '/login');
+      const abortedInput = document.createElement('input');
+      abortedInput.setAttribute('type', 'hidden');
+      abortedInput.setAttribute('name', 'aborted');
+      abortedInput.setAttribute('value', 'true');
+      const challengeInput = document.createElement('input');
+      challengeInput.setAttribute('type', 'hidden');
+      challengeInput.setAttribute('name', 'login_challenge');
+      challengeInput.setAttribute('value', (new URLSearchParams(location.search)).get('login_challenge')!);
+      form.appendChild(abortedInput);
+      form.appendChild(challengeInput);
+      document.body.appendChild(form);
+      form.submit();
+};

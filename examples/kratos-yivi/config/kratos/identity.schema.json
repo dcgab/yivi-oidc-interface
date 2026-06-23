@@ -38,10 +38,16 @@
               "type": "string"
             }
           }
+        },
+        "phone_number": {
+          "title": "Phone number",
+          "format": "tel",
+          "type": "string"
         }
       },
       "required": [
-        "email"
+        "email",
+        "phone_number"
       ],
       "additionalProperties": false
     }
