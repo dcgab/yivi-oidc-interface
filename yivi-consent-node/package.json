@@ -24,7 +24,7 @@
     "vite-plugin-node-polyfills": "^0.21.0"
   },
   "dependencies": {
-    "@ory/client": "^1.9.0",
+    "@ory/client": "^1.22.57",
     "@privacybydesign/yivi-client": "^1.0.0",
     "@privacybydesign/yivi-core": "^1.0.0",
     "@privacybydesign/yivi-css": "^1.0.1",

@@ -61,19 +61,3 @@ Plaintext `.env` files are convenient for local research and demos, but they are
 not a complete production secret-management system. For real deployments,
 regenerate all secrets, use deployment-specific hostnames and URLs, and protect
 the populated `.env` files according to the deployment environment.
-
-## Migration Notes
-
-This configuration model is a breaking change for existing local checkouts that
-relied on hardcoded Compose defaults or tracked Yivi key/requester files.
-
-1. Run `scripts/setup-local-env.sh` to create local env files and Yivi runtime
-   files.
-2. Move any local custom URLs, database users, ports, or client settings into
-   the relevant `.env` file.
-3. If existing Docker database volumes were created with old passwords, run
-   `./reset_dev_data.sh` before starting the stack.
-4. Recreate the Hydra OIDC client and store its generated credentials in
-   `examples/kratos-yivi/.env`.
-5. Use `./start_dev.sh` or `./start.sh`, which pass both env files to Docker
-   Compose.
