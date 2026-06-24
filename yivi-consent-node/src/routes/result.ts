@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express from "express"
-import { irmaBackend } from "../config"
+import { yiviClient } from "../config"
 
 const router = express.Router();
 
 router.get('/:sessionToken', (req, res) => {
     if(!req.params.sessionToken) res.sendStatus(400);
-    irmaBackend.getSessionResultJwt(req.params.sessionToken)
+    yiviClient.getSessionResultJwt(req.params.sessionToken)
         .then((result: any) => {
         return res.json({jwt: result});
         })

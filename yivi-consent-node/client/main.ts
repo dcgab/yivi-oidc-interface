@@ -2,7 +2,7 @@
 
 import '@privacybydesign/yivi-css'
 import './index.css'
-import yivi from '@privacybydesign/yivi-frontend';
+import { newWeb } from '@privacybydesign/yivi-frontend';
 import { jwtDecode } from 'jwt-decode';
 
 const yiviBackendUrl = import.meta.env.VITE_YIVI_BACKEND_URL;
@@ -37,7 +37,7 @@ let options = {
   }
 };
 
-const yiviWeb = yivi.newWeb({
+const yiviWeb = newWeb({
   ...options,
   element: '#yivi-web-form',
 });

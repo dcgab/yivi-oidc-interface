@@ -12,6 +12,13 @@ scripts/setup-local-env.sh
 examples/kratos-yivi/create_client.sh
 ```
 
+The local stack pins the Yivi server runtime to `ghcr.io/privacybydesign/yivi:v1.0.0`
+so development and production Compose use the same reproducible server release.
+
+If you are upgrading an existing checkout that already has local `.env` files,
+rerun `scripts/setup-local-env.sh --force` before `./start_dev.sh` so the
+generated requester token and Yivi runtime config match the current server.
+
 If Postgres authentication fails during Hydra or Kratos migrations after
 regenerating `.env` files, reset the local development database volumes:
 

@@ -3,7 +3,7 @@
 
 import express from "express"
 import path from 'path';
-import { hydraAdmin, irmaBackend } from "../config"
+import { hydraAdmin, yiviClient } from "../config"
 import jwt from 'jsonwebtoken'
 
 const router = express.Router();
@@ -62,7 +62,7 @@ router.post('/', (req, res, next) => {
     }
     
 
-    irmaBackend.getServerPublicKey()
+    yiviClient.getPublicKey()
         .then((key: string) => {
             let verifiedJwt: any = '';
             try {
@@ -96,9 +96,7 @@ router.post('/', (req, res, next) => {
                 })
                 .catch(err => console.log(err.response));
         })
-
-
-    // const publicKey = await irmaBackend.getServerPublicKey()
+    // const publicKey = await yiviClient.getPublicKey()
     // const result = jwt.verify(jwtToken, publicKey);  
 
     // res.json(jwtToken);

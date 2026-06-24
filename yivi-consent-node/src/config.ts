@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
-// @ts-ignore
-import IrmaBackend from '@privacybydesign/irma-backend';
 import { Configuration, OAuth2Api } from "@ory/client";
+import { YiviHttpClient } from './yivi';
 
 dotenv.config();
 
@@ -57,9 +56,10 @@ const runtimeConfig: RuntimeConfig = {
   yiviBackendDebug: parseBoolean('YIVI_BACKEND_DEBUG', false),
 };
 
-const irmaBackend = new IrmaBackend(runtimeConfig.irmaServerUrl, {
-  serverToken: runtimeConfig.irmaServerToken,
-  debugging: runtimeConfig.yiviBackendDebug,
+const yiviClient = new YiviHttpClient({
+  baseUrl: runtimeConfig.irmaServerUrl,
+  requesterToken: runtimeConfig.irmaServerToken,
+  debug: runtimeConfig.yiviBackendDebug,
 });
 
 const configuration = new Configuration({
@@ -70,6 +70,6 @@ const hydraAdmin = new OAuth2Api(configuration);
 
 export {
   runtimeConfig,
-  irmaBackend,
+  yiviClient,
   hydraAdmin,
 };

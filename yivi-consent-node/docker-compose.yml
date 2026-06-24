@@ -18,8 +18,8 @@ services:
       - yivi-oidc-network
 
   irma_server:
-    image: ghcr.io/privacybydesign/irma:latest
-    command: server --verbose --jwt-privkey-file /irmago/config/private.pem --url "${IRMA_SERVER_PUBLIC_URL}"
+    image: ghcr.io/privacybydesign/yivi:v1.0.0
+    command: irma server --verbose --jwt-privkey-file /irmago/config/private.pem --url "${IRMA_SERVER_PUBLIC_URL}" --config /irmago/config/irmaserver.json
     ports:
       - "8088:8088"
     volumes:
