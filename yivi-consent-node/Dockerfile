@@ -20,6 +20,6 @@ COPY . /usr/src/app
 # USER 10000
 
 RUN npm run build
-ENTRYPOINT npm run dev
+ENTRYPOINT npm run start
 
 EXPOSE 3000

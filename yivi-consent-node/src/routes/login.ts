@@ -34,7 +34,7 @@ router.get('/', (req, res, next) => {
         loginChallenge: loginChallenge
     })
         .then((_) => {
-            res.sendFile(path.join(process.cwd(), 'client/dist/index.html'))
+            res.sendFile(path.join(process.cwd(), 'dist/public/index.html'))
         })
         .catch(_ => {
             console.log(_);

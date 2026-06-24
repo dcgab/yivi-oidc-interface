@@ -7,6 +7,7 @@ dotenv.config();
 import { runtimeConfig } from './config';
 
 import login from './routes/login';
+import status from './routes/status';
 import start from './routes/start';
 import result from './routes/result';
 import complete from './routes/complete';
@@ -23,17 +24,14 @@ app.use(express.urlencoded());
 //   next()
 // })
 
-app.use('/assets', express.static(path.join(process.cwd(), './client/dist/assets'), {
-
-}))
-
-app.use('/', express.static(path.join(process.cwd(), './public')));
+app.use('/', express.static(path.join(process.cwd(), './dist/public')));
 
 // app.get('/', (_, res) => {
 //   res.sendFile(path.join(process.cwd(), 'client/dist/index.html'))
 // });
 
 app.use('/login', login);
+app.use('/status', status);
 app.use('/start', start);
 app.use('/result', result)
 app.use('/complete', complete);
