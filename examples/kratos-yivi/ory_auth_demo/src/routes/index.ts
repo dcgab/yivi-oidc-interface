@@ -1,6 +1,6 @@
 import express, {Request, Response, NextFunction} from 'express'
 import ory from '../auth'
-import { Session } from '@ory/client';
+import { Session } from '@ory/kratos-client';
 const router = express.Router();
 
 /* GET home page. */
