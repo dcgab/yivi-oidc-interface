@@ -17,13 +17,13 @@ services:
       - intranet
 
   kratos-migrate:
-    image: oryd/kratos:v1.3.0
+    image: oryd/kratos:v26.2.0
     env_file:
       - path: ./examples/kratos-yivi/.env
         required: true
     environment:
       - DSN=${KRATOS_DSN}
-    command: -c /etc/config/kratos/kratos-prod.yml migrate sql -e --yes
+    command: -c /etc/config/kratos/kratos-prod.yml migrate sql up -e --yes
     restart: on-failure
     volumes:
       - ./examples/kratos-yivi/config/kratos:/etc/config/kratos:ro,z
@@ -35,10 +35,7 @@ services:
       - intranet
 
   kratos-selfservice-ui-node:
-    build:
-      context: ./vendor/kratos-selfservice-ui-node
-      dockerfile: ./Dockerfile
-    image: oryd/kratos-selfservice-ui-node:v1.1.0
+    image: oryd/kratos-selfservice-ui-node:v26.2.0
     env_file: ./examples/kratos-yivi/.env
     environment:
       - KRATOS_PUBLIC_URL=${KRATOS_INTERNAL_PUBLIC_URL}
@@ -62,7 +59,7 @@ services:
       postgresd_kratos:
         condition: service_healthy
         restart: false
-    image: oryd/kratos:v1.3.0
+    image: oryd/kratos:v26.2.0
     restart: unless-stopped
     env_file: ./examples/kratos-yivi/.env
     environment:

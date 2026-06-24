@@ -1,6 +1,10 @@
 # Kratos Yivi Example
 
-This example runs Ory Kratos as an OIDC client of the local Yivi OIDC provider.
+This example runs **Ory Kratos v26.2.0** as an OIDC client of the local Yivi OIDC provider.
+
+The Kratos demo app (`ory_auth_demo`) uses `@ory/kratos-client` for
+Kratos-specific `FrontendApi` and `Session` types. Hydra API usage in
+`yivi-consent-node` remains on `@ory/client`.
 
 ## Setup
 

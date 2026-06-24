@@ -1,4 +1,4 @@
-import { Configuration, ConfigurationParameters, FrontendApi } from '@ory/client'
+import { Configuration, ConfigurationParameters, FrontendApi } from '@ory/kratos-client'
 const oryConfig = new Configuration({
     basePath: process.env.ORY_SDK_URL,
     // basePath: `${process.env.APP_URL}/.ory`,
