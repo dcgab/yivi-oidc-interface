@@ -115,10 +115,14 @@ requester_config="$yivi_runtime_dir/irmaserver.json"
 if write_if_missing "$requester_config" "Yivi requester config"; then
   cat > "$requester_config" <<JSON
 {
+  "no_auth": false,
   "requestors": {
     "oryhydra": {
       "auth_method": "token",
-      "key": "$yivi_requester_token"
+      "key": "$yivi_requester_token",
+      "disclose_perms": [
+        "*"
+      ]
     }
   }
 }

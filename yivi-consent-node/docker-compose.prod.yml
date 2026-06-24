@@ -25,8 +25,8 @@ services:
       - yivi-oidc-network
 
   irma_server:
-    build: ./vendor/irmago/
-    command: server -vv --jwt-privkey-file /irmago/config/private.pem --url "${IRMA_SERVER_PUBLIC_URL}" -p 8088 --production --no-email true --config /irmago/config/irmaserver.json
+    image: ghcr.io/privacybydesign/yivi:v1.0.0
+    command: irma server -vv --jwt-privkey-file /irmago/config/private.pem --url "${IRMA_SERVER_PUBLIC_URL}" -p 8088 --production --config /irmago/config/irmaserver.json
     volumes:
       - ${YIVI_RUNTIME_DIR}:/irmago/config:ro,z
     networks:

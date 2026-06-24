@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express from "express"
-import { irmaBackend, hydraAdmin } from "../config"
+import { hydraAdmin, yiviClient } from "../config"
 
 // const irmaRequest = {
 //   '@context': 'https://irma.app/ld/request/disclosure/v2',
@@ -41,13 +41,13 @@ router.get('/:login_challenge', (req, res) => {
     loginChallenge: hydraLoginChallenge
   })
     .then(({ data: body }) => {
-      irmaBackend.startSession(createIrmaRequestFromScope(body.requested_scope!))
+      yiviClient.createSession(createIrmaRequestFromScope(body.requested_scope!))
         .then((result: any) => {
-          console.log("irmaBackend.startSession result", result);
+          console.log("yiviClient.createSession result", result);
           res.json(result);
         })
         .catch((_: any) => {
-          console.log("irmaBackend.startSession error", _);
+          console.log("yiviClient.createSession error", _);
           return res.status(500).send('Could not start disclosure request session');
         })
     })
