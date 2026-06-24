@@ -8,7 +8,7 @@ import path from 'path';
 const router = express.Router();
 
 router.get('/', (_, res) => {
-    res.sendFile(path.join(process.cwd(), 'client/dist/index.html'))
+    res.sendFile(path.join(process.cwd(), 'dist/public/index.html'))
 })
 
 export default router
