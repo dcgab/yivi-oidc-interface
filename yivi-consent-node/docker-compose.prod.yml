@@ -34,7 +34,7 @@ services:
 
   hydra:
     env_file: ./yivi-consent-node/.env
-    image: oryd/hydra:v2.3.0
+    image: oryd/hydra:v26.2.0
     command: serve -c /etc/config/hydra/hydra-prod.yml all
     environment:
       - SECRETS_SYSTEM=${HYDRA_SECRETS_SYSTEM}
@@ -60,7 +60,7 @@ services:
 
   hydra-migrate:
     env_file: ./yivi-consent-node/.env
-    image: oryd/hydra:v2.3.0
+    image: oryd/hydra:v26.2.0
     environment:
       - DSN=${HYDRA_DSN}
     command: migrate -c /etc/config/hydra/hydra-prod.yml sql up -e --yes

@@ -34,6 +34,16 @@ const required = (name: string): string => {
   return value;
 };
 
+const normalizeHydraAdminUrl = (value: string): string => {
+  const normalized = value.trim().replace(/\/+$/, '');
+  if (normalized === '') {
+    throw new Error('Invalid configuration HYDRA_ADMIN_URL: expected non-empty URL');
+  }
+
+  // The Ory SDK already includes the /admin path for OAuth2 admin endpoints.
+  return normalized.replace(/\/admin$/, '');
+};
+
 const optionalToken = (name: string): string | false => {
   const value = process.env[name];
   return value && value.trim() !== '' ? value : false;
@@ -50,7 +60,7 @@ const parsePort = (): number => {
 
 const runtimeConfig: RuntimeConfig = {
   port: parsePort(),
-  hydraAdminUrl: required('HYDRA_ADMIN_URL'),
+  hydraAdminUrl: normalizeHydraAdminUrl(required('HYDRA_ADMIN_URL')),
   irmaServerUrl: required('IRMA_SERVER_URL'),
   irmaServerToken: optionalToken('IRMA_SERVER_TOKEN'),
   yiviBackendDebug: parseBoolean('YIVI_BACKEND_DEBUG', false),
