@@ -34,6 +34,7 @@ the previous passwords. Reset the local development databases and start again:
 
 This removes local Hydra and Kratos database volumes.
 
+
 Create the local Hydra OIDC client used by the Kratos example:
 
 ```sh

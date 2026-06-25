@@ -84,7 +84,7 @@ services:
       - intranet
 
   postgresd_kratos:
-    image: postgres:17.4
+    image: postgres:18.4
     env_file: ./examples/kratos-yivi/.env
     environment:
       - POSTGRES_USER=${KRATOS_POSTGRES_USER}
@@ -98,7 +98,7 @@ services:
     networks:
       - intranet
     volumes:
-      - postgres-kratos-data:/var/lib/postgresql/data
+      - postgres-kratos-data:/var/lib/postgresql
 
 networks:
   intranet:

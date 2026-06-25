@@ -76,7 +76,7 @@ services:
 
   postgresd_hydra:
     env_file: ./yivi-consent-node/.env
-    image: postgres:17.4
+    image: postgres:18.4
     environment:
       - POSTGRES_USER=${HYDRA_POSTGRES_USER}
       - POSTGRES_PASSWORD=${HYDRA_POSTGRES_PASSWORD}
@@ -87,7 +87,7 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - postgres-hydra-data:/var/lib/postgresql/data
+      - postgres-hydra-data:/var/lib/postgresql
     networks:
       - yivi-oidc-network
 

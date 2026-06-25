@@ -84,7 +84,7 @@ services:
       - yivi-oidc-network
 
   postgresd_kratos:
-    image: postgres:16.2
+    image: postgres:18.4
     env_file: ./examples/kratos-yivi/.env
     ports:
       - "5433:5432"
@@ -100,7 +100,7 @@ services:
     networks:
       - yivi-oidc-network
     volumes:
-      - postgres-kratos-data:/var/lib/postgresql/data
+      - postgres-kratos-data:/var/lib/postgresql
 
 networks:
   yivi-oidc-network:
