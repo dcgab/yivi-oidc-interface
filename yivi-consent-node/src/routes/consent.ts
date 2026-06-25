@@ -2,27 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import express from "express"
-// import path from 'path';
+import type { Request } from "express"
+import type { AcceptOAuth2ConsentRequestSession } from "@ory/client";
+import jwt from 'jsonwebtoken'
+import type { AttributeKeys} from '../attributes';
+import { attributeMap } from '../attributes';
 import { hydraAdmin } from "../config"
-import { AcceptOAuth2ConsentRequestSession } from "@ory/client";
-import jwt, { JwtPayload } from 'jsonwebtoken'
-import { AttributeKeys, attributeMap } from '../attributes';
+import {
+    getResponseErrorDescription,
+    getString,
+    isRecord,
+    isVerifiedYiviJwtPayload,
+    type VerifiedYiviJwtPayload,
+    type YiviDisclosure,
+} from "../types"
 
 const router = express.Router();
 
-interface DisclosureAttribute {
-    rawvalue: string;
-    value: {
-        "": string;
-        "en": string;
-        "nl": string;
-    },
-    id: string;
-    status: string;
-    issuancetime: number;
-};
-
-interface Disclosure extends Array<Array<DisclosureAttribute>>{};
 const attributeLookup = {
     "pbdf.sidn-pbdf.mobilenumber.mobilenumber": "phone_number",
     "pbdf.sidn-pbdf.email.email": "email",
@@ -31,130 +27,149 @@ const attributeLookup = {
 }
 type AttributesType = keyof typeof attributeLookup;
 
-const createSession = (_yivi_jwt: JwtPayload, _session: AcceptOAuth2ConsentRequestSession): AcceptOAuth2ConsentRequestSession => {
-    // Yivi JWT token is already verified in login step.
-    // The token is bound to the Hydra session, so it is trusted
-    const disclosed = _yivi_jwt['disclosed'] as Disclosure;
-    const idToken: { [key: string]: any } = {};
+type ConsentQuery = {
+    consent_challenge?: string;
+}
+
+type ConsentBody = {
+    challenge?: unknown;
+    submit?: unknown;
+    remember?: unknown;
+}
+
+const createSession = (
+    verifiedYiviJwt: VerifiedYiviJwtPayload,
+): AcceptOAuth2ConsentRequestSession => {
+    const disclosed: YiviDisclosure = verifiedYiviJwt.disclosed;
+    const idToken: Record<string, string> = {};
     for(const credential of disclosed) {
         for(const attribute of credential) {
-            idToken[attributeLookup[attribute.id as AttributesType]] = attribute.rawvalue;
+            const mappedAttribute = attributeLookup[attribute.id as AttributesType]
+            if (mappedAttribute) {
+                idToken[mappedAttribute] = attribute.rawvalue;
+            }
         }
     }
-    
-    console.log({
-        access_token: _session.access_token,
-        id_token: {
-            ...idToken,
-            ..._session.id_token
-        }
-    });
-    
-    // return jwtDecoded as jwt.JwtPayload;
+
     return {
-        access_token: _session.access_token,
+        access_token: {},
         id_token: {
             ...idToken,
-            ..._session.id_token
         }
-    } as AcceptOAuth2ConsentRequestSession;
-    
+    };
 }
 
-const session: AcceptOAuth2ConsentRequestSession = {
-    access_token: {
-
-    },
-    id_token: {
+const getContextJwt = (context: unknown): string | undefined => {
+    if (!isRecord(context)) {
+        return undefined
     }
+
+    return getString(context.yivi_jwt)
 }
 
-router.get('/', (req, res, next) => {
-    let consentChallenge = req.query.consent_challenge;
+router.get('/', async (req: Request<Record<string, never>, unknown, ConsentBody, ConsentQuery>, res, next) => {
+    const consentChallenge = getString(req.query.consent_challenge);
     if(consentChallenge === undefined) {
         next(new Error("Expected a consent challenge to be set but received none."))
         return
-    } else {
-        consentChallenge = String(consentChallenge)
     }
 
-    hydraAdmin.getOAuth2ConsentRequest({
-        consentChallenge: consentChallenge
-    })
-    .then(({data: body}) => {
-        const context = body.context! as {yivi_jwt: string};
-        const decodedJwt =  jwt.decode(context.yivi_jwt) as JwtPayload;
-        let requestedScopeFriendlyNames: Record<string, string> = {};
-        for(const disclosedAttr of decodedJwt['disclosed'].flat()) {
-            requestedScopeFriendlyNames[attributeMap[disclosedAttr['id'] as AttributeKeys].name.en] = disclosedAttr['rawvalue'];
+    try {
+        const {data: body} = await hydraAdmin.getOAuth2ConsentRequest({
+            consentChallenge,
+        })
+        const contextJwt = getContextJwt(body.context)
+        if (!contextJwt) {
+            return next(new Error("Missing Yivi JWT in consent request context"))
+        }
+
+        const decodedJwt = jwt.decode(contextJwt);
+        if (!isVerifiedYiviJwtPayload(decodedJwt)) {
+            return next(new Error("Unexpected Yivi JWT payload"))
+        }
+
+        const requestedScopeFriendlyNames: Record<string, string> = {};
+        for(const disclosedAttr of decodedJwt.disclosed.flat()) {
+            requestedScopeFriendlyNames[attributeMap[disclosedAttr.id as AttributeKeys].name.en] = disclosedAttr.rawvalue;
         }
 
         if(body.skip || body.client?.skip_consent) {
-            return hydraAdmin.acceptOAuth2ConsentRequest({
-                consentChallenge: consentChallenge,
+            const {data: acceptBody} = await hydraAdmin.acceptOAuth2ConsentRequest({
+                consentChallenge,
                 acceptOAuth2ConsentRequest: {
                     grant_scope: body.requested_scope,
                     grant_access_token_audience: body.requested_access_token_audience,
-                    session: createSession(decodedJwt, session),
-                    remember: !!req.body.remember,
+                    session: createSession(decodedJwt),
+                    remember: false,
                     remember_for: 0
                 }
-            }).then(({data: body}) => {
-                return res.redirect(String(body.redirect_to))
-            });
+            })
+            return res.redirect(String(acceptBody.redirect_to))
         }
-        console.log(body);
-        
-        
-        
+
         return res.render("consent.ejs", {
             challenge: consentChallenge,
             requestedData: requestedScopeFriendlyNames,
             user: body.subject,
             client: body.client
         });
-    })
-    .catch(err => next(new Error(err.response.data.error_description)))
+    } catch (error) {
+        next(new Error(getResponseErrorDescription(error) ?? "Consent challenge expired"))
+    }
 });
 
-// @ts-ignore
-router.post("/", (req, res, next) => {
-    const challenge = req.body.challenge;
-    if(req.body.submit === 'Deny') {
-        return (hydraAdmin.rejectOAuth2ConsentRequest({
+router.post("/", async (req: Request<Record<string, never>, unknown, ConsentBody>, res, next) => {
+    const challenge = getString(req.body.challenge);
+    const submit = getString(req.body.submit);
+    const remember = req.body.remember === true || req.body.remember === "true" || req.body.remember === "on";
+
+    if (!challenge) {
+        return res.status(400).send("Missing consent challenge")
+    }
+
+    if(submit === 'Deny') {
+        const {data: body} = await hydraAdmin.rejectOAuth2ConsentRequest({
             consentChallenge: challenge,
             rejectOAuth2Request: {
                 error: "access_denied",
                 error_description: "The resource owner denied the request"
             }
-        }).then(({data: body}) => {
-            return res.redirect(body.redirect_to);
-        }))
+        })
+        return res.redirect(body.redirect_to);
     }
 
-    hydraAdmin.getOAuth2ConsentRequest({
-        consentChallenge: challenge
-    })
-    .then(({data: body}) => {
-        const context = body.context! as {yivi_jwt: string};
-        const decodedJwt =  jwt.decode(context.yivi_jwt) as JwtPayload;
-        if(Math.round(Date.now() / 1000) >= decodedJwt.exp!) {
+    try {
+        const {data: body} = await hydraAdmin.getOAuth2ConsentRequest({
+            consentChallenge: challenge
+        })
+        const contextJwt = getContextJwt(body.context)
+        if (!contextJwt) {
+            return next(new Error("Missing Yivi JWT in consent request context"))
+        }
+
+        const decodedJwt = jwt.decode(contextJwt);
+        if (!isVerifiedYiviJwtPayload(decodedJwt)) {
+            return next(new Error("Unexpected Yivi JWT payload"))
+        }
+
+        if(typeof decodedJwt.exp !== "number" || Math.round(Date.now() / 1000) >= decodedJwt.exp) {
             return next(new Error('Yivi JWT token expired'));
         }
 
-        return hydraAdmin.acceptOAuth2ConsentRequest({
+        const {data: acceptBody} = await hydraAdmin.acceptOAuth2ConsentRequest({
             consentChallenge: challenge,
             acceptOAuth2ConsentRequest: {
                 grant_scope: body.requested_scope,
                 grant_access_token_audience: body.requested_access_token_audience,
-                session: createSession(decodedJwt, session),
-                remember: !!req.body.remember,
+                session: createSession(decodedJwt),
+                remember,
                 remember_for: 0
             }
-        }).then(({data: body}) => {
-            res.redirect(String(body.redirect_to))
-        });
-    })
+        })
+        return res.redirect(String(acceptBody.redirect_to))
+    } catch (error) {
+        next(new Error(getResponseErrorDescription(error) ?? "Consent flow failed"))
+    }
 });
 
 export default router

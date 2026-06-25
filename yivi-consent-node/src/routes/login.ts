@@ -3,104 +3,119 @@
 
 import express from "express"
 import path from 'path';
+import type { Request } from "express"
 import { hydraAdmin, yiviClient } from "../config"
 import jwt from 'jsonwebtoken'
+import {
+    getResponseErrorDescription,
+    getString,
+    isVerifiedYiviJwtPayload,
+    type VerifiedYiviJwtPayload,
+} from "../types"
 
 const router = express.Router();
 
-const getSubject = (jwt: any): string => {
-    // Array of subjectidentifiers to use for the OAuth2 Subject parameter. The attributes are prioritised.
+type LoginQuery = {
+    login_challenge?: string;
+}
+
+type LoginBody = {
+    jwt?: unknown;
+    login_challenge?: unknown;
+    aborted?: unknown;
+}
+
+const getSubject = (verifiedJwt: VerifiedYiviJwtPayload): string => {
     const subjectIdentifiersIds = ['pbdf.sidn-pbdf.email.email', 'pbdf.sidn-pbdf.mobilenumber.mobilenumber'];
-    // let subjectIdentifiers: string[] = [];
-    // Set default subject value in case of no found match inside subjectIdentifiersIds
-    let subject = jwt['disclosed'][0][0]['rawvalue'];
+    const defaultSubject = verifiedJwt.disclosed[0]?.[0]?.rawvalue;
+    if (!defaultSubject) {
+        throw new Error("Missing disclosed Yivi subject attribute")
+    }
+
+    let subject = defaultSubject;
     for(const subjectId of subjectIdentifiersIds) {
-        subject = jwt['disclosed'].flat().find((attribute: any) => attribute['id'] === subjectId)['rawvalue'];
-        break;
+        const attribute = verifiedJwt.disclosed
+            .flat()
+            .find((disclosedAttribute) => disclosedAttribute.id === subjectId);
+        if (attribute) {
+            subject = attribute.rawvalue;
+            break;
+        }
     }
     return subject;
 }
 
-router.get('/', (req, res, next) => {
-    let loginChallenge = req.query.login_challenge;
+router.get('/', async (req: Request<Record<string, never>, unknown, LoginBody, LoginQuery>, res, next) => {
+    const loginChallenge = getString(req.query.login_challenge);
     if (loginChallenge === undefined) {
         next(new Error("Expected a login challenge to be set but received none."))
         return
-    } else {
-        loginChallenge = String(loginChallenge)
     }
 
-    hydraAdmin.getOAuth2LoginRequest({
-        loginChallenge: loginChallenge
-    })
-        .then((_) => {
-            res.sendFile(path.join(process.cwd(), 'dist/public/index.html'))
+    try {
+        await hydraAdmin.getOAuth2LoginRequest({
+            loginChallenge,
         })
-        .catch(_ => {
-            console.log(_);
-            next(new Error("Login challenge expired"));
-            return;
-        })
+        res.sendFile(path.join(process.cwd(), 'dist/public/index.html'))
+    } catch (error) {
+        console.log(error);
+        next(new Error("Login challenge expired"));
+    }
 })
 
-router.post('/', (req, res, next) => {
-    const jwtToken = req.body.jwt;
-    const loginChallenge = req.body.login_challenge;
-    const aborted = req.body.aborted;
+router.post('/', async (req: Request<Record<string, never>, unknown, LoginBody>, res, next) => {
+    const jwtToken = getString(req.body.jwt);
+    const loginChallenge = getString(req.body.login_challenge);
+    const aborted = getString(req.body.aborted);
+
+    if (!loginChallenge) {
+        return res.status(400).send("Missing login challenge")
+    }
 
     if(aborted === 'true') {
-        hydraAdmin.rejectOAuth2LoginRequest({
-            loginChallenge: loginChallenge,
+        const {data: body} = await hydraAdmin.rejectOAuth2LoginRequest({
+            loginChallenge,
             rejectOAuth2Request: {
                 error: "access_denied",
                 error_description: "The resource owner denied the request"
             }
         })
-        .then(({data: body}) => {
-            return res.redirect(body.redirect_to);
-        })
+        return res.redirect(body.redirect_to);
     }
-    
 
-    yiviClient.getPublicKey()
-        .then((key: string) => {
-            let verifiedJwt: any = '';
-            try {
-                verifiedJwt = jwt.verify(jwtToken, key);
-            } catch (error: any) {
-                return next(new Error('Invalid key or expired token'))
-            }
-            
-            if(verifiedJwt['proofStatus'] !== 'VALID') {
-                return next(new Error('Disclosured resulted with invalid proof'));
-            }
+    if (!jwtToken) {
+        return res.status(400).send("Missing JWT token")
+    }
 
-            hydraAdmin.getOAuth2LoginRequest({
-                loginChallenge: loginChallenge
-            })
-                .then(({ data: _ }) => {
-                    hydraAdmin.acceptOAuth2LoginRequest({
-                        loginChallenge: loginChallenge,
-                        acceptOAuth2LoginRequest: {
-                            subject: getSubject(verifiedJwt),
-                            context: {
-                                "yivi_jwt": jwtToken
-                            },
+    try {
+        const key = await yiviClient.getPublicKey()
+        const verifiedJwt = jwt.verify(jwtToken, key)
+        if (!isVerifiedYiviJwtPayload(verifiedJwt)) {
+            return next(new Error('Unexpected Yivi JWT payload'))
+        }
 
-                        }
+        if(verifiedJwt.proofStatus !== 'VALID') {
+            return next(new Error('Disclosured resulted with invalid proof'));
+        }
 
-                    })
-                        .then(({ data: body }) => {
-                            res.redirect(String(body.redirect_to))
-                        })
-                })
-                .catch(err => console.log(err.response));
+        await hydraAdmin.getOAuth2LoginRequest({
+            loginChallenge,
         })
-    // const publicKey = await yiviClient.getPublicKey()
-    // const result = jwt.verify(jwtToken, publicKey);  
 
-    // res.json(jwtToken);
-    // res.redirect('/login');
+        const { data: body } = await hydraAdmin.acceptOAuth2LoginRequest({
+            loginChallenge,
+            acceptOAuth2LoginRequest: {
+                subject: getSubject(verifiedJwt),
+                context: {
+                    yivi_jwt: jwtToken
+                },
+            }
+        })
+
+        return res.redirect(String(body.redirect_to))
+    } catch (error) {
+        return next(new Error(getResponseErrorDescription(error) ?? 'Invalid key or expired token'))
+    }
 })
 
 export default router

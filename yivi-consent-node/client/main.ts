@@ -3,6 +3,7 @@
 import '@privacybydesign/yivi-css'
 import './index.css'
 import { newWeb } from '@privacybydesign/yivi-frontend';
+import type { SessionMappings, YiviOptions } from '@privacybydesign/yivi-frontend';
 import { jwtDecode } from 'jwt-decode';
 
 const yiviBackendUrl = import.meta.env.VITE_YIVI_BACKEND_URL;
@@ -12,7 +13,21 @@ if (!yiviBackendUrl) {
 
 const yiviFrontendDebug = String(import.meta.env.VITE_YIVI_FRONTEND_DEBUG ?? 'false').toLowerCase() === 'true';
 
-let options = {
+type JwtResult = {
+  jwt: string;
+}
+
+type SessionUrlOptions = {
+  url?: string;
+}
+
+const isJwtResult = (value: unknown): value is JwtResult =>
+  typeof value === 'object' &&
+  value !== null &&
+  'jwt' in value &&
+  typeof value.jwt === 'string'
+
+const options: YiviOptions = {
   // Developer options
   debugging: yiviFrontendDebug,
 
@@ -27,11 +42,13 @@ let options = {
   session: {
     url: yiviBackendUrl,
     start: {
-      url: (o) => `${o.url}/start/${(new URLSearchParams(location.search)).get('login_challenge')}`,
+      url: (o: SessionUrlOptions) =>
+        `${o.url ?? ''}/start/${(new URLSearchParams(location.search)).get('login_challenge')}`,
       method: 'GET',
     },
     result: {
-      url: (o, { sessionPtr, sessionToken }) => `${o.url}/result/${sessionToken}`,
+      url: (o: SessionUrlOptions, { sessionToken }: SessionMappings) =>
+        `${o.url ?? ''}/result/${sessionToken ?? ''}`,
       method: 'GET',
     }
   }
@@ -43,7 +60,11 @@ const yiviWeb = newWeb({
 });
 
 yiviWeb.start()
-  .then((result: { jwt: string }) => {
+  .then((result: unknown) => {
+    if (!isJwtResult(result)) {
+      throw new Error('Unexpected Yivi result payload');
+    }
+
     let secondsRemaining = 0; // TODO: set to other value in production!
     console.log("Successful disclosure! 🎉", jwtDecode(result.jwt));
     setInterval(() => {

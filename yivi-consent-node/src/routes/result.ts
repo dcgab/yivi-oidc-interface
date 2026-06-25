@@ -6,16 +6,18 @@ import { yiviClient } from "../config"
 
 const router = express.Router();
 
-router.get('/:sessionToken', (req, res) => {
-    if(!req.params.sessionToken) res.sendStatus(400);
-    yiviClient.getSessionResultJwt(req.params.sessionToken)
-        .then((result: any) => {
+router.get('/:sessionToken', async (req, res) => {
+    if (!req.params.sessionToken) {
+        return res.sendStatus(400);
+    }
+
+    try {
+        const result = await yiviClient.getSessionResultJwt(req.params.sessionToken)
         return res.json({jwt: result});
-        })
-        .catch((e: any) => {
-        console.log(e);
-        res.sendStatus(400);
-        })
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(400);
+    }
 })
 
 export default router

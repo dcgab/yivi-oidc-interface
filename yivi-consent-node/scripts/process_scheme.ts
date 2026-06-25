@@ -33,16 +33,65 @@ export interface Attribute {
     }
 };
 
+type LocalizedText = {
+    en: string;
+    nl: string;
+};
 
+type ParsedAttribute = {
+    '@_id': string;
+    '@_revocation'?: boolean | string;
+    Name: LocalizedText;
+    Description: LocalizedText;
+};
 
-let attributesMap: Record<string, Attribute> = {};
+type ParsedIssueSpecification = {
+    IssueSpecification: {
+        Attributes: {
+            Attribute: ParsedAttribute | ParsedAttribute[];
+        };
+    };
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null;
+
+const isLocalizedText = (value: unknown): value is LocalizedText =>
+    isRecord(value) &&
+    typeof value.en === 'string' &&
+    typeof value.nl === 'string';
+
+const isParsedAttribute = (value: unknown): value is ParsedAttribute =>
+    isRecord(value) &&
+    typeof value['@_id'] === 'string' &&
+    isLocalizedText(value.Name) &&
+    isLocalizedText(value.Description) &&
+    (value['@_revocation'] === undefined ||
+        typeof value['@_revocation'] === 'boolean' ||
+        typeof value['@_revocation'] === 'string');
+
+const isParsedIssueSpecification = (value: unknown): value is ParsedIssueSpecification => {
+    if (!isRecord(value) || !isRecord(value.IssueSpecification) || !isRecord(value.IssueSpecification.Attributes)) {
+        return false;
+    }
+
+    const attributes = value.IssueSpecification.Attributes.Attribute;
+    return Array.isArray(attributes)
+        ? attributes.every((attribute) => isParsedAttribute(attribute))
+        : isParsedAttribute(attributes);
+};
+
+const attributesMap: Record<string, Attribute> = {};
 
 for (const issuer of issuers) {
     const credentials = getDirectories(path.join(process.cwd(), `../vendor/schemes/${SCHEME}`, issuer, 'Issues'));
     for (const credential of credentials) {
         const credentialDescription = fs.readFileSync(path.join(process.cwd(), `../vendor/schemes/${SCHEME}`, issuer, 'Issues', credential, 'description.xml'), 'utf-8');
-        const parsedCredentials = parser.parse(credentialDescription);
-        let attributes = parsedCredentials['IssueSpecification']['Attributes']['Attribute'];
+        const parsedCredentials: unknown = parser.parse(credentialDescription);
+        if (!isParsedIssueSpecification(parsedCredentials)) {
+            throw new Error(`Unexpected XML format for ${issuer}/${credential}`);
+        }
+        let attributes = parsedCredentials.IssueSpecification.Attributes.Attribute;
         if (!Array.isArray(attributes)) {
             attributes = [attributes]
         }
@@ -51,14 +100,14 @@ for (const issuer of issuers) {
             attributesMap[`${SCHEME}.${issuer}.${credential}.${attribute['@_id']}`] = {
                 id: attribute['@_id'],
                 name: {
-                    en: attribute['Name']['en'],
-                    nl: attribute['Name']['nl']
+                    en: attribute.Name.en,
+                    nl: attribute.Name.nl
                 },
                 description: {
-                    en: attribute['Description']['en'],
-                    nl: attribute['Description']['nl']
+                    en: attribute.Description.en,
+                    nl: attribute.Description.nl
                 }
-            } as Attribute;
+            };
         }
     }
 }
@@ -91,5 +140,4 @@ typeDoc += JSON.stringify(attributesMap, null, 2);
 const outputPath = path.join(process.cwd(), './src/attributes.ts');
 fs.writeFileSync(outputPath, typeDoc, {flag: 'w'});
 console.log(`attributes.ts written to ${outputPath}`);
-
 
