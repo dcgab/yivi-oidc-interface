@@ -41,7 +41,7 @@ app.use('/consent', consent);
 //   res.status(500).send("Something went wrong");
 // })
 
-app.all('*', (_ , res) => {
+app.all('/{*splat}', (_, res) => {
   res.sendStatus(404);
 })
 
