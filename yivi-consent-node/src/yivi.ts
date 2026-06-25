@@ -10,6 +10,13 @@ type RequestOptions = {
   body?: unknown;
 };
 
+type YiviSessionResult = {
+  sessionToken?: string;
+  sessionPtr?: unknown;
+  frontendRequest?: unknown;
+  [key: string]: unknown;
+};
+
 const trimTrailingSlashes = (value: string): string => value.replace(/\/+$/, '');
 
 const joinUrl = (baseUrl: string, path: string): string =>
@@ -67,8 +74,8 @@ class YiviHttpClient {
     return (await response.text()) as T;
   }
 
-  createSession(request: unknown): Promise<unknown> {
-    return this.request<unknown>({
+  createSession(request: unknown): Promise<YiviSessionResult> {
+    return this.request<YiviSessionResult>({
       method: 'POST',
       path: '/session',
       body: request,

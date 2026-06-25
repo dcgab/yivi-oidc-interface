@@ -1,69 +1,38 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
 import dotenv from 'dotenv'
-import fs from 'fs'
-import path from 'path'
-dotenv.config()
+import http from 'http'
+import createDebug from 'debug'
 
 import { app } from './app'
 
-const debug = require('debug')('ory-auth-demo:server');
-const http = require('http');
+dotenv.config()
 
-/**
- * Get port from environment and store in Express.
- */
-
+const debug = createDebug('ory-auth-demo:server');
 const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
-
-// const options = {
-//   key: fs.readFileSync(path.resolve(__dirname, '../keys/server.key')),
-//   cert: fs.readFileSync(path.resolve(__dirname, '../keys/server.crt')),
-// }
-
 const server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-/**
- * Normalize a port into a number, string, or false.
- */
+function normalizePort(val: string): number | string | false {
+  const parsedPort = parseInt(val, 10);
 
-function normalizePort(val: any) {
-  const port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
+  if (Number.isNaN(parsedPort)) {
     return val;
   }
 
-  if (port >= 0) {
-    // port number
-    return port;
+  if (parsedPort >= 0) {
+    return parsedPort;
   }
 
   return false;
 }
 
-/**
- * Event listener for HTTP server "error" event.
- */
-
-function onError(error: any) {
+function onError(error: NodeJS.ErrnoException) {
   if (error.syscall !== 'listen') {
     throw error;
   }
@@ -72,7 +41,6 @@ function onError(error: any) {
     ? 'Pipe ' + port
     : 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
       console.error(bind + ' requires elevated privileges');
@@ -87,12 +55,12 @@ function onError(error: any) {
   }
 }
 
-/**
- * Event listener for HTTP server "listening" event.
- */
-
 function onListening() {
   const addr = server.address();
+  if (addr === null) {
+    return;
+  }
+
   const bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;

@@ -37,10 +37,6 @@ app.use('/result', result)
 app.use('/complete', complete);
 app.use('/consent', consent);
 
-// app.use((_3: any, _: any, res: Response, _2: any) => {
-//   res.status(500).send("Something went wrong");
-// })
-
 app.all('/{*splat}', (_, res) => {
   res.sendStatus(404);
 })
