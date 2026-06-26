@@ -1,23 +1,22 @@
-// Copyright © 2023 Ory Corp
-// SPDX-License-Identifier: Apache-2.0
+import express from "express";
+import type { Request } from "express";
 
-import express from "express"
-import { yiviClient } from "../config"
+import { requireString } from "../request";
+import type { YiviSessionService } from "../services/yivi-session";
 
-const router = express.Router();
+type ResultParams = {
+  sessionToken?: string;
+};
 
-router.get('/:sessionToken', async (req, res) => {
-    if (!req.params.sessionToken) {
-        return res.sendStatus(400);
-    }
+const createResultRouter = (yiviSessionService: YiviSessionService) => {
+  const router = express.Router();
 
-    try {
-        const result = await yiviClient.getSessionResultJwt(req.params.sessionToken)
-        return res.json({jwt: result});
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(400);
-    }
-})
+  router.get("/:sessionToken", async (req: Request<ResultParams>, res) => {
+    const sessionToken = requireString(req.params.sessionToken, "session token");
+    return res.json(await yiviSessionService.result(sessionToken));
+  });
 
-export default router
+  return router;
+};
+
+export { createResultRouter };
