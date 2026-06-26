@@ -6,8 +6,9 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "ts-node-dev src/app.ts",
-    "start": "NODE_ENV=production tsx src/app.ts",
+    "dev": "ts-node-dev src/server.ts",
+    "start": "NODE_ENV=production tsx src/server.ts",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
     "build": "vite build && postcss public/tailwind.css -o dist/public/style.css",
     "dev-client": "vite",
     "preview-client": "vite preview",

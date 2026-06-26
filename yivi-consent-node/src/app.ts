@@ -1,46 +1,39 @@
-import path from 'path';
-import express, {  } from "express";
-// import jwt from 'jsonwebtoken';
-import ViteExpress from "vite-express"
-import dotenv from 'dotenv';
-dotenv.config();
-import { runtimeConfig } from './config';
+import path from "path";
+import express from "express";
 
-import login from './routes/login';
-import status from './routes/status';
-import start from './routes/start';
-import result from './routes/result';
-import complete from './routes/complete';
-import consent from './routes/consent';
+import type { AppDependencies } from "./dependencies";
+import { errorHandler, notFoundHandler } from "./errors";
+import { createConsentRouter } from "./routes/consent";
+import { createLoginRouter } from "./routes/login";
+import { createResultRouter } from "./routes/result";
+import status from "./routes/status";
+import { createStartRouter } from "./routes/start";
+import { createConsentService } from "./services/consent";
+import { createLoginService } from "./services/login";
+import { createYiviSessionService } from "./services/yivi-session";
 
-const app = express();
+const createApp = ({ hydraAdmin, yiviClient }: AppDependencies) => {
+  const app = express();
+  const yiviSessionService = createYiviSessionService(hydraAdmin, yiviClient);
+  const loginService = createLoginService(hydraAdmin, yiviClient);
+  const consentService = createConsentService(hydraAdmin);
 
-app.set("views", path.join(process.cwd(), './src/views'));
-app.set("view engine", "ejs");
-app.use(express.urlencoded());
+  app.set("views", path.join(process.cwd(), "./src/views"));
+  app.set("view engine", "ejs");
+  app.use(express.urlencoded({ extended: false }));
 
-// app.use((_, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
-//   next()
-// })
+  app.use("/", express.static(path.join(process.cwd(), "./dist/public")));
 
-app.use('/', express.static(path.join(process.cwd(), './dist/public')));
+  app.use("/login", createLoginRouter(loginService));
+  app.use("/status", status);
+  app.use("/start", createStartRouter(yiviSessionService));
+  app.use("/result", createResultRouter(yiviSessionService));
+  app.use("/consent", createConsentRouter(consentService));
 
-// app.get('/', (_, res) => {
-//   res.sendFile(path.join(process.cwd(), 'client/dist/index.html'))
-// });
+  app.all("/{*splat}", notFoundHandler);
+  app.use(errorHandler);
 
-app.use('/login', login);
-app.use('/status', status);
-app.use('/start', start);
-app.use('/result', result)
-app.use('/complete', complete);
-app.use('/consent', consent);
+  return app;
+};
 
-app.all('/{*splat}', (_, res) => {
-  res.sendStatus(404);
-})
-
-ViteExpress.listen(app, runtimeConfig.port, () =>
-  console.log(`Server is listening on port ${runtimeConfig.port}...`),
-);
+export { createApp };

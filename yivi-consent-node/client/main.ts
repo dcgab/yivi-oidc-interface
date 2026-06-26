@@ -4,7 +4,6 @@ import '@privacybydesign/yivi-css'
 import './index.css'
 import { newWeb } from '@privacybydesign/yivi-frontend';
 import type { SessionMappings, YiviOptions } from '@privacybydesign/yivi-frontend';
-import { jwtDecode } from 'jwt-decode';
 
 const yiviBackendUrl = import.meta.env.VITE_YIVI_BACKEND_URL;
 if (!yiviBackendUrl) {
@@ -12,6 +11,9 @@ if (!yiviBackendUrl) {
 }
 
 const yiviFrontendDebug = String(import.meta.env.VITE_YIVI_FRONTEND_DEBUG ?? 'false').toLowerCase() === 'true';
+const loginChallenge = new URLSearchParams(location.search).get('login_challenge');
+const redirectText = document.getElementById('redirect-text') as HTMLParagraphElement | null;
+const abortButton = document.getElementById('abort-web') as HTMLButtonElement | null;
 
 type JwtResult = {
   jwt: string;
@@ -26,6 +28,39 @@ const isJwtResult = (value: unknown): value is JwtResult =>
   value !== null &&
   'jwt' in value &&
   typeof value.jwt === 'string'
+
+const setStatus = (message: string): void => {
+  if (redirectText) {
+    redirectText.textContent = message;
+  }
+}
+
+const createHiddenInput = (name: string, value: string): HTMLInputElement => {
+  const input = document.createElement('input');
+  input.setAttribute('type', 'hidden');
+  input.setAttribute('name', name);
+  input.setAttribute('value', value);
+  return input;
+}
+
+const submitLoginForm = (fields: Record<string, string>): void => {
+  const form = document.createElement('form');
+  form.setAttribute('method', 'post');
+  form.setAttribute('action', '/login');
+  for (const [name, value] of Object.entries(fields)) {
+    form.appendChild(createHiddenInput(name, value));
+  }
+  document.body.appendChild(form);
+  form.submit();
+}
+
+if (!loginChallenge) {
+  setStatus('Login cannot start because the login challenge is missing.');
+  if (abortButton) {
+    abortButton.disabled = true;
+  }
+  throw new Error('Missing login challenge');
+}
 
 const options: YiviOptions = {
   // Developer options
@@ -43,7 +78,7 @@ const options: YiviOptions = {
     url: yiviBackendUrl,
     start: {
       url: (o: SessionUrlOptions) =>
-        `${o.url ?? ''}/start/${(new URLSearchParams(location.search)).get('login_challenge')}`,
+        `${o.url ?? ''}/start/${loginChallenge}`,
       method: 'GET',
     },
     result: {
@@ -65,53 +100,34 @@ yiviWeb.start()
       throw new Error('Unexpected Yivi result payload');
     }
 
-    let secondsRemaining = 0; // TODO: set to other value in production!
-    console.log("Successful disclosure! 🎉", jwtDecode(result.jwt));
-    setInterval(() => {
-      (document.getElementById('redirect-text') as HTMLParagraphElement).textContent = `Success! Redirecting in ${secondsRemaining--}`;
-      if (secondsRemaining === -1) {
-        const form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', '/login');
-        const jwtInput = document.createElement('input');
-        jwtInput.setAttribute('type', 'hidden');
-        jwtInput.setAttribute('name', 'jwt');
-        jwtInput.setAttribute('value', result.jwt);
-        const challengeInput = document.createElement('input');
-        challengeInput.setAttribute('type', 'hidden');
-        challengeInput.setAttribute('name', 'login_challenge');
-        challengeInput.setAttribute('value', (new URLSearchParams(location.search)).get('login_challenge')!);
-        form.appendChild(jwtInput);
-        form.appendChild(challengeInput);
-        document.body.appendChild(form);
-        form.submit();
-      }
-    }, 1000)
-
+    if (yiviFrontendDebug) {
+      console.debug('Yivi disclosure completed');
+    }
+    setStatus('Success. Redirecting...');
+    submitLoginForm({
+      jwt: result.jwt,
+      login_challenge: loginChallenge,
+    });
   })
   .catch(error => {
     if (error === 'Aborted') {
-      console.log('We closed it ourselves, so no problem 😅');
+      if (yiviFrontendDebug) {
+        console.debug('Yivi disclosure flow aborted');
+      }
       return;
     }
-    console.error("Couldn't do what you asked 😢", error);
+    setStatus('The Yivi login flow failed. Please try again.');
+    if (yiviFrontendDebug) {
+      console.error('Yivi disclosure flow failed', error);
+    }
   });
 
-document.getElementById('abort-web')!.onclick = () => { 
-  yiviWeb.abort() 
-  const form = document.createElement('form');
-      form.setAttribute('method', 'post');
-      form.setAttribute('action', '/login');
-      const abortedInput = document.createElement('input');
-      abortedInput.setAttribute('type', 'hidden');
-      abortedInput.setAttribute('name', 'aborted');
-      abortedInput.setAttribute('value', 'true');
-      const challengeInput = document.createElement('input');
-      challengeInput.setAttribute('type', 'hidden');
-      challengeInput.setAttribute('name', 'login_challenge');
-      challengeInput.setAttribute('value', (new URLSearchParams(location.search)).get('login_challenge')!);
-      form.appendChild(abortedInput);
-      form.appendChild(challengeInput);
-      document.body.appendChild(form);
-      form.submit();
+if (abortButton) {
+  abortButton.onclick = () => {
+    yiviWeb.abort();
+    submitLoginForm({
+      aborted: 'true',
+      login_challenge: loginChallenge,
+    });
+  };
 };
